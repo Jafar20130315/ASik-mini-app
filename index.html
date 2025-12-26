@@ -1,153 +1,228 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Family Hub</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background-color: var(--tg-theme-bg-color, #fff); color: var(--tg-theme-text-color, #000); }
-        .btn-primary { background-color: var(--tg-theme-button-color, #3390ec); color: var(--tg-theme-button-text-color, #fff); }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Family Hub</title>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+body{
+  background: var(--tg-theme-bg-color,#fff);
+  color: var(--tg-theme-text-color,#000);
+}
+.btn-primary{
+  background: var(--tg-theme-button-color,#3390ec);
+  color: var(--tg-theme-button-text-color,#fff);
+}
+</style>
 </head>
+
 <body class="p-4 select-none">
 
-    <div id="tab-add" class="space-y-4">
-        <h1 class="text-2xl font-bold text-center mb-6">💰 Xarajat qo'shish</h1>
-        
-        <div>
-            <label class="block text-sm font-medium mb-1 op-70">Summa</label>
-            <input type="number" id="amount" class="w-full p-3 rounded-xl border border-gray-300 bg-transparent text-lg" placeholder="Masalan: 12000">
-        </div>
+<!-- ------------------ TABS ------------------ -->
+<div class="space-y-4">
 
-        <div>
-            <label class="block text-sm font-medium mb-1 op-70">Nima olindi?</label>
-            <input type="text" id="cat" class="w-full p-3 rounded-xl border border-gray-300 bg-transparent" placeholder="Masalan: Non, Taksi">
-        </div>
+<div class="hidden" id="tab-add">
+  <h1 class="text-2xl font-bold text-center mb-3">➕ Xarajat qo‘shish</h1>
 
-        <button onclick="addExpense()" class="btn-primary w-full py-4 rounded-xl font-bold text-lg mt-4 active:opacity-80 transition">
-            Qo'shish
-        </button>
-    </div>
+  <label>Summa</label>
+  <input id="amount" type="number" class="w-full p-3 rounded-xl border">
 
-    <div id="tab-stats" class="hidden space-y-4">
-        <h1 class="text-2xl font-bold text-center mb-4">📊 Statistika</h1>
-        
-        <div class="flex justify-between bg-gray-100 p-4 rounded-xl dark:bg-gray-800">
-            <span>Bugun:</span>
-            <span class="font-bold" id="stat-today">0</span>
-        </div>
-        <div class="flex justify-between bg-gray-100 p-4 rounded-xl dark:bg-gray-800">
-            <span>Shu oy:</span>
-            <span class="font-bold" id="stat-month">0</span>
-        </div>
+  <label class="mt-2 block">Nima?</label>
+  <input id="cat" type="text" class="w-full p-3 rounded-xl border">
 
-        <h3 class="font-bold mt-4">Oxirgi xarajatlar:</h3>
-        <ul id="history-list" class="space-y-2 text-sm">
-            </ul>
-    </div>
+  <button onclick="addExpense()" class="btn-primary w-full mt-3 p-3 rounded-xl font-bold">
+    Qo‘shish
+  </button>
+</div>
 
-    <div class="fixed bottom-0 left-0 w-full border-t bg-white dark:bg-black p-2 flex justify-around pb-4">
-        <button onclick="switchTab('add')" class="flex flex-col items-center w-1/2 p-2 opacity-50 focus:opacity-100 font-bold">
-            ➕ Qo'shish
-        </button>
-        <button onclick="switchTab('stats')" class="flex flex-col items-center w-1/2 p-2 opacity-50 focus:opacity-100 font-bold">
-            📊 Statistika
-        </button>
-    </div>
+<div class="hidden" id="tab-me">
+  <h1 class="text-2xl font-bold text-center mb-3">📋 Shaxsiy xarajatlar</h1>
+  <ul id="me-list" class="space-y-2 text-sm"></ul>
+</div>
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand(); // На весь экран
+<div class="hidden" id="tab-family">
+  <h1 class="text-2xl font-bold text-center mb-3">👨‍👩‍👧‍👦 Umumiy ro‘yxat</h1>
+  <ul id="fam-list" class="space-y-2 text-sm"></ul>
+</div>
 
-        // ⚠️ ВСТАВЬТЕ СЮДА ССЫЛКУ НА ВАШ WORKER
-        const API_URL = "https://asik.windowsnoutbook.workers.dev"; 
+<div class="hidden" id="tab-stats">
+  <h1 class="text-2xl font-bold text-center mb-3">📊 Statistika</h1>
 
-        const user = tg.initDataUnsafe.user || { id: "test_id", first_name: "Test" };
+  <div class="flex justify-between bg-gray-100 p-3 rounded-xl">
+    <span>Bugun:</span><span id="stat-today">0</span>
+  </div>
 
-        function switchTab(tab) {
-            document.getElementById('tab-add').classList.add('hidden');
-            document.getElementById('tab-stats').classList.add('hidden');
-            document.getElementById(`tab-${tab}`).classList.remove('hidden');
-            
-            if(tab === 'stats') loadStats();
-        }
+  <div class="flex justify-between bg-gray-100 p-3 rounded-xl">
+    <span>Shu oy:</span><span id="stat-month">0</span>
+  </div>
 
-        async function addExpense() {
-            const amount = document.getElementById('amount').value;
-            const cat = document.getElementById('cat').value;
+  <h3 class="mt-3 font-bold">Oxirgi xaridlar:</h3>
+  <ul id="hist-list" class="space-y-2 text-sm"></ul>
 
-            if (!amount || !cat) {
-                tg.showAlert("Maydonlarni to'ldiring!");
-                return;
-            }
+  <button onclick="getExcel()" class="btn-primary w-full mt-3 p-3 rounded-xl">
+    🧾 Excel (CSV) olish
+  </button>
+</div>
 
-            tg.MainButton.showProgress();
-            
-            try {
-                const res = await fetch(`${API_URL}/api/add`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        userId: user.id,
-                        userName: user.first_name,
-                        amount: amount,
-                        cat: cat
-                    })
-                });
+<div class="hidden" id="tab-send">
+  <h1 class="text-2xl font-bold text-center mb-3">✉️ Oilaga xabar</h1>
 
-                if (res.ok) {
-                    tg.HapticFeedback.notificationOccurred('success');
-                    document.getElementById('amount').value = '';
-                    document.getElementById('cat').value = '';
-                    tg.showAlert("✅ Saqlandi!");
-                } else {
-                    tg.showAlert("Xatolik yuz berdi.");
-                }
-            } catch (e) {
-                alert("Internet xatosi: " + e.message);
-            }
-            tg.MainButton.hideProgress();
-        }
+  <textarea id="send-msg" class="w-full p-3 rounded-xl border" rows="4"
+    placeholder="Masalan: Bugun soat 7 da yig‘ilish :)"></textarea>
 
-        async function loadStats() {
-            try {
-                const res = await fetch(`${API_URL}/api/stats`, {
-                    method: 'POST', // Или GET, но в Worker мы проверяем body, лучше POST для API
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: user.id })
-                });
-                const data = await res.json();
-                
-                // Фильтрация
-                const now = new Date();
-                let todaySum = 0;
-                let monthSum = 0;
-                let html = "";
+  <button onclick="sendMessageFamily()" class="btn-primary w-full mt-3 p-3 rounded-xl">
+    Yuborish
+  </button>
+</div>
 
-                // Сортировка: новые сверху
-                data.sort((a, b) => b.id - a.id);
+<div class="hidden" id="tab-connect">
+  <h1 class="text-2xl font-bold text-center mb-3">🔗 Oila boshqaruvi</h1>
 
-                data.forEach(item => {
-                    const date = new Date(item.id);
-                    if (date.toDateString() === now.toDateString()) todaySum += parseFloat(item.amount);
-                    if (date.getMonth() === now.getMonth()) monthSum += parseFloat(item.amount);
+  <button onclick="openConnect()" class="btn-primary w-full p-3 rounded-xl mb-2">
+    ➕ Oila ulash (/connect)
+  </button>
 
-                    html += `<li class="flex justify-between border-b pb-1 border-gray-200 dark:border-gray-700">
-                        <span>${item.cat} <span class="text-xs opacity-50">(${item.name})</span></span>
-                        <span class="font-mono">${item.amount}</span>
-                    </li>`;
-                });
+  <button onclick="leaveFamily()" class="btn-primary w-full p-3 rounded-xl">
+    🚪 Oiladan chiqish (/unc)
+  </button>
+</div>
 
-                document.getElementById('stat-today').innerText = todaySum.toLocaleString();
-                document.getElementById('stat-month').innerText = monthSum.toLocaleString();
-                document.getElementById('history-list').innerHTML = html.slice(0, 500); // Показать только часть
+</div>
 
-            } catch (e) {
-                document.getElementById('history-list').innerText = "Yuklashda xato...";
-            }
-        }
-    </script>
+<!-- ------------------ NAVIGATION ------------------ -->
+<div class="fixed bottom-0 left-0 w-full border-t bg-white p-2 flex justify-around">
+<button onclick="tab('add')">➕</button>
+<button onclick="tab('me')">📋</button>
+<button onclick="tab('family')">👨‍👩‍👧‍👦</button>
+<button onclick="tab('stats')">📊</button>
+<button onclick="tab('send')">✉️</button>
+<button onclick="tab('connect')">⚙️</button>
+</div>
+
+<script>
+const tg = window.Telegram.WebApp;
+tg.expand();
+
+const API_URL = "https://asik.windowsnoutbook.workers.dev";
+const BOT_USERNAME = "@ASikkeeper_bot";
+
+const user = tg.initDataUnsafe.user || { id:"test", first_name:"Test" };
+
+function tab(name){
+  document.querySelectorAll("[id^='tab-']").forEach(b=>b.classList.add("hidden"));
+  document.getElementById("tab-"+name).classList.remove("hidden");
+
+  if(name==="me") loadMe();
+  if(name==="family") loadFamily();
+  if(name==="stats") loadStats();
+}
+
+// --------------- ADD EXPENSE ----------------
+async function addExpense(){
+  const a=document.getElementById("amount").value;
+  const c=document.getElementById("cat").value;
+
+  if(!a||!c){ tg.showAlert("Maydonlarni to‘ldir!"); return; }
+
+  await fetch(API_URL+"/api/add",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json"},
+    body:JSON.stringify({
+      userId:user.id,
+      userName:user.first_name,
+      amount:a,
+      cat:c
+    })
+  });
+
+  document.getElementById("amount").value="";
+  document.getElementById("cat").value="";
+  tg.showAlert("✅ Qo‘shildi");
+}
+
+// --------------- LOAD ALL DATA ----------------
+async function getAll(){
+  const r=await fetch(API_URL+"/api/stats",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json"},
+    body:JSON.stringify({ userId:user.id })
+  });
+  return r.json();
+}
+
+// --------------- PERSONAL LIST ----------------
+async function loadMe(){
+  const data=await getAll();
+  let html="";
+  data.filter(x=>x.name===user.first_name).forEach(x=>{
+    html+=`<li class="border-b pb-1">${x.cat} — <b>${x.amount}</b></li>`;
+  });
+  document.getElementById("me-list").innerHTML=html||"Bo‘sh";
+}
+
+// --------------- FAMILY LIST ----------------
+async function loadFamily(){
+  const data=await getAll();
+  let html="";
+  data.forEach(x=>{
+    html+=`<li class="border-b pb-1">
+      ${x.cat} — <b>${x.amount}</b>
+      <span class="text-xs opacity-50">(${x.name})</span>
+    </li>`;
+  });
+  document.getElementById("fam-list").innerHTML=html||"Bo‘sh";
+}
+
+// --------------- STATS ----------------
+async function loadStats(){
+  const data=await getAll();
+  const now=new Date();
+
+  let today=0, month=0, html="";
+
+  data.sort((a,b)=>b.id-a.id);
+
+  data.forEach(x=>{
+    const d=new Date(x.id);
+    if(d.toDateString()===now.toDateString()) today+=Number(x.amount);
+    if(d.getMonth()===now.getMonth()) month+=Number(x.amount);
+
+    html+=`<li class="border-b pb-1">
+      ${x.cat} — <b>${x.amount}</b>
+      <span class="text-xs opacity-50">(${x.name})</span>
+    </li>`;
+  });
+
+  document.getElementById("stat-today").innerText=today.toLocaleString();
+  document.getElementById("stat-month").innerText=month.toLocaleString();
+  document.getElementById("hist-list").innerHTML=html;
+}
+
+// --------------- CSV VIA BOT ----------------
+function getExcel(){
+  window.open(`https://t.me/${BOT_USERNAME}?start=stats`,`_blank`);
+}
+
+// --------------- SEND FAMILY MESSAGE ----------------
+function sendMessageFamily(){
+  const msg=document.getElementById("send-msg").value;
+  if(!msg){ tg.showAlert("Xabar yoz!"); return; }
+  window.open(`https://t.me/${BOT_USERNAME}?start=send_${encodeURIComponent(msg)}`);
+}
+
+// --------------- CONNECT / LEAVE FAMILY ----------------
+function openConnect(){
+  tg.showAlert("Botda /connect buyrug‘idan foydalaning");
+  window.open(`https://t.me/${BOT_USERNAME}`);
+}
+
+function leaveFamily(){
+  window.open(`https://t.me/${BOT_USERNAME}?start=unc`);
+}
+</script>
 </body>
 </html>
