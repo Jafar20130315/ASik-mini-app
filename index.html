@@ -2,128 +2,116 @@
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Statistika</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>Family Hub</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
 body{
-  background: linear-gradient(180deg,#0f172a,#020617);
+  background:linear-gradient(180deg,#0f172a,#020617);
   color:white;
-  font-family: system-ui;
+  font-family:Inter,system-ui;
 }
-
 .card{
   background:#0b1220;
   border:1px solid #1e293b;
+  border-radius:18px;
   box-shadow:0 20px 40px rgba(0,0,0,.4);
 }
-
 input,textarea{
   background:#020617 !important;
   color:white !important;
   border:1px solid #1e293b !important;
+  border-radius:14px;
 }
-
-button{
-  transition:.2s;
-}
-button:active{
-  transform:scale(.97);
-}
-.tab-btn-active{
+.navbtn-active{
   color:#38bdf8;
 }
 </style>
-
 </head>
 
-<body class="p-4 pb-24 select-none">
+<body class="p-4 pb-28">
 
 <h1 class="text-3xl font-bold text-center mb-4">💸 Family Hub</h1>
 
-<!-- ================= TABS ================= -->
-<div class="grid grid-cols-2 gap-2 text-center mb-3">
-  <button onclick="openTab('add')" id="btn-add" class="p-2 rounded-xl card">➕ Qo‘shish</button>
-  <button onclick="openTab('stats')" id="btn-stats" class="p-2 rounded-xl card">📊 Statistika</button>
-  <button onclick="openTab('send')" id="btn-send" class="p-2 rounded-xl card">✉️ Xabar yuborish</button>
-  <button onclick="openTab('family')" id="btn-family" class="p-2 rounded-xl card">👨‍👩‍👧‍👦 Oila</button>
+<!-- NAV -->
+<div class="fixed bottom-0 left-0 w-full bg-black/50 backdrop-blur-lg border-t border-slate-700 p-2 grid grid-cols-4 text-center">
+  <button onclick="openTab('add')" id="nav-add">➕</button>
+  <button onclick="openTab('stats')" id="nav-stats">📊</button>
+  <button onclick="openTab('send')" id="nav-send">✉️</button>
+  <button onclick="openTab('family')" id="nav-family">👨‍👩‍👧‍👦</button>
 </div>
 
-<!-- ================= ADD ================= -->
-<div id="tab-add" class="card p-4 rounded-2xl space-y-3 hidden">
+<!-- ADD -->
+<div id="tab-add" class="card p-4 space-y-3 hidden">
 
-  <h2 class="text-xl font-bold">➕ Xarajat qo‘shish</h2>
+  <h2 class="font-bold text-xl">➕ Xarajat qo‘shish</h2>
 
-  <input id="amount" type="number" class="w-full p-3 rounded-xl" placeholder="Summa (masalan 12000)">
-  <input id="cat" type="text" class="w-full p-3 rounded-xl" placeholder="Nima olindi?">
+  <input id="amount" type="number" placeholder="Summa (12000)">
+  <input id="cat" type="text" placeholder="Masalan: Non, Taksi">
 
-  <button onclick="addExpense()" class="w-full p-3 rounded-xl bg-sky-600 font-bold">
-    💾 Saqlash
-  </button>
+  <button onclick="addExpense()" class="w-full bg-sky-600 p-3 rounded-xl font-bold">💾 Saqlash</button>
 
 </div>
 
-<!-- ================= STATS ================= -->
-<div id="tab-stats" class="card p-4 rounded-2xl space-y-3 hidden">
+<!-- STATS -->
+<div id="tab-stats" class="card p-4 space-y-3 hidden">
 
-  <h2 class="text-xl font-bold">📊 Statistika</h2>
+  <h2 class="font-bold text-xl">📊 Statistika</h2>
 
-  <div class="flex justify-between bg-black/40 rounded-xl p-3">
-    <span>Bugun:</span>
-    <span id="stat-today" class="font-bold">0</span>
+  <div class="flex justify-between bg-black/40 p-3 rounded-xl">
+    <span>Bugun</span><b id="st-today">0</b>
   </div>
 
-  <div class="flex justify-between bg-black/40 rounded-xl p-3">
-    <span>Bu oy:</span>
-    <span id="stat-month" class="font-bold">0</span>
+  <div class="flex justify-between bg-black/40 p-3 rounded-xl">
+    <span>Bu oy</span><b id="st-month">0</b>
   </div>
 
-  <h3 class="font-bold mt-2">Oxirgi xarajatlar</h3>
-  <ul id="history" class="space-y-2 text-sm"></ul>
+  <div class="h-px bg-slate-700 my-2"></div>
+
+  <div id="history" class="space-y-2 text-sm"></div>
 
 </div>
 
-<!-- ================= SEND ================= -->
-<div id="tab-send" class="card p-4 rounded-2xl space-y-3 hidden">
+<!-- SEND -->
+<div id="tab-send" class="card p-4 space-y-3 hidden">
 
-  <h2 class="text-xl font-bold">✉️ Oilaga xabar yuborish</h2>
+  <h2 class="font-bold text-xl">✉️ Xabar yuborish</h2>
 
-  <textarea id="msg" rows="4" class="w-full p-3 rounded-xl" placeholder="Xabar matni..."></textarea>
+  <textarea id="msg" rows="3" placeholder="Xabar matni..."></textarea>
 
-  <button onclick="sendMessage()" class="w-full p-3 rounded-xl bg-emerald-600 font-bold">
+  <button onclick="sendMessage()" class="w-full bg-emerald-600 p-3 rounded-xl font-bold">
     📤 Yuborish
   </button>
 
 </div>
 
-<!-- ================= FAMILY ================= -->
-<div id="tab-family" class="card p-4 rounded-2xl space-y-4 hidden">
+<!-- FAMILY -->
+<div id="tab-family" class="card p-4 space-y-3 hidden">
 
-  <h2 class="text-xl font-bold">👨‍👩‍👧‍👦 Oila boshqaruvi</h2>
+  <h2 class="font-bold text-xl">👨‍👩‍👧‍👦 Oila</h2>
 
   <div id="connect-block">
-      <input id="connectId" type="number" class="w-full p-3 rounded-xl" placeholder="Oila boshlig‘i ID">
+    <input id="connectId" type="number" placeholder="Oila boshlig‘i ID">
 
-      <button onclick="connectFamily()" class="w-full p-3 rounded-xl bg-blue-600 font-bold">
-        🔗 Ulanish so‘rash
-      </button>
+    <button onclick="connectFamily()" class="w-full bg-blue-600 p-3 rounded-xl font-bold">
+      🔗 Ulanish so‘rash
+    </button>
 
-      <button onclick="shareInvite()" class="w-full p-3 rounded-xl bg-purple-600 font-bold">
-        📤 Oilani ulash (kontakt tanlash)
-      </button>
+    <button onclick="shareInvite()" class="w-full bg-purple-600 p-3 rounded-xl font-bold">
+      📤 Oilani ulash
+    </button>
   </div>
 
-  <div id="leave-block" class="hidden space-y-3">
-      <div class="text-emerald-400 font-bold">
-        ✅ Sen hozir oiladasan
-      </div>
+  <div id="leave-block" class="hidden">
+    <p class="text-emerald-400 font-bold">🔥 Sen oiladasan</p>
 
-      <button onclick="leaveFamily()" class="w-full p-3 rounded-xl bg-red-600 font-bold">
-        🚪 Oiladan chiqish
-      </button>
+    <button onclick="leaveFamily()" class="w-full bg-red-600 p-3 rounded-xl font-bold">
+      🚪 Oiladan chiqish
+    </button>
   </div>
 
 </div>
@@ -136,136 +124,103 @@ const API_URL = "https://asik.windowsnoutbook.workers.dev";
 
 const user = tg.initDataUnsafe.user || { id:"test", first_name:"Test" };
 
-/* ================= TABLAR ================= */
-
-function openTab(name){
+// -------- tabs
+function openTab(n){
   document.querySelectorAll("[id^=tab-]").forEach(e=>e.classList.add("hidden"));
-  document.querySelectorAll("[id^=btn-]").forEach(e=>e.classList.remove("tab-btn-active"));
-
-  document.getElementById("tab-"+name).classList.remove("hidden");
-  document.getElementById("btn-"+name).classList.add("tab-btn-active");
-
-  if(name==="stats") loadStats();
-  if(name==="family") checkFamilyState();
+  document.querySelectorAll("[id^=nav-]").forEach(e=>e.classList.remove("navbtn-active"));
+  document.getElementById("tab-"+n).classList.remove("hidden");
+  document.getElementById("nav-"+n).classList.add("navbtn-active");
+  if(n==="stats") loadStats();
+  if(n==="family") familyState();
 }
-
 openTab("add");
 
-/* ================= API ================= */
-
-async function api(path,data){
-  return fetch(API_URL+path,{
+// -------- API helper
+async function api(p,d){
+  const r = await fetch(API_URL+p,{
     method:"POST",
     headers:{ "Content-Type":"application/json"},
-    body:JSON.stringify(data)
-  }).then(r=>r.json().catch(()=>({})));
+    body:JSON.stringify(d)
+  });
+  return r.json();
 }
 
-/* ================= ADD ================= */
-
+// -------- add
 async function addExpense(){
-  await api("/api/add",{
-    userId:user.id,
-    userName:user.first_name,
-    amount:amount.value,
-    cat:cat.value
-  });
-  tg.showAlert("✅ Saqlandi");
-  amount.value="";
-  cat.value="";
+  await api("/api/add",{userId:user.id,userName:user.first_name,amount:amount.value,cat:cat.value});
+  tg.showAlert("✔ Saqlandi");
+  amount.value="";cat.value="";
 }
 
-/* ================= SEND ================= */
-
+// -------- send
 async function sendMessage(){
-  await api("/api/send",{
-    userId:user.id,
-    userName:user.first_name,
-    text:msg.value
-  });
-  tg.showAlert("✉️ Yuborildi");
+  await api("/api/send",{userId:user.id,userName:user.first_name,text:msg.value});
+  tg.showAlert("Yuborildi");
   msg.value="";
 }
 
-/* ================= CONNECT ================= */
-
+// -------- connect
 async function connectFamily(){
-  await api("/api/connect",{
-    userId:user.id,
-    userName:user.first_name,
-    targetId:connectId.value
-  });
-  tg.showAlert("📨 So‘rov yuborildi");
+  await api("/api/connect",{userId:user.id,userName:user.first_name,targetId:connectId.value});
+  tg.showAlert("So‘rov yuborildi");
 }
 
-/* share via contacts */
-
+// -------- share
 function shareInvite(){
-
-  const text = `Ulanish uchun botga /connect ${user.id} (mono) deb yuboring`;
-
-  const url =
-    "https://t.me/share/url?text=" +
-    encodeURIComponent(text);
-
-  window.open(url,"_blank");
+  const text=`Ulanish uchun botga /connect ${user.id} deb yuboring`;
+  window.open("https://t.me/share/url?text="+encodeURIComponent(text),"_blank");
 }
 
-/* ================= LEAVE ================= */
-
+// -------- leave
 async function leaveFamily(){
-  await api("/api/unc",{ userId:user.id });
-  tg.showAlert("🚪 Chiqding");
-  checkFamilyState();
+  await api("/api/unc",{userId:user.id});
+  tg.showAlert("Chiqding");
+  familyState();
 }
 
-/* ================= FAMILY STATUS ================= */
-
-async function checkFamilyState(){
-
-  // juda oddiy usul: agar stats javobida boshqa odamlar ham bo‘lsa → oilada
-  const data = await api("/api/stats",{ userId:user.id });
-
-  const mine = data.filter(x=>x.name===user.first_name).length;
-  const all = data.length;
-
-  if(all>mine){
-    // oilada
-    document.getElementById("connect-block").classList.add("hidden");
-    document.getElementById("leave-block").classList.remove("hidden");
+// -------- family state
+async function familyState(){
+  const data=await api("/api/stats",{userId:user.id});
+  const mine=data.filter(x=>x.name===user.first_name).length;
+  if(data.length>mine){
+    connect-block.classList.add("hidden");
+    leave-block.classList.remove("hidden");
   } else {
-    // oilada emas
-    document.getElementById("connect-block").classList.remove("hidden");
-    document.getElementById("leave-block").classList.add("hidden");
+    connect-block.classList.remove("hidden");
+    leave-block.classList.add("hidden");
   }
 }
 
-/* ================= STATS ================= */
-
+// -------- stats
 async function loadStats(){
-
-  const data = await api("/api/stats",{ userId:user.id });
-
-  const now = new Date();
-  let today=0, month=0;
+  const data=await api("/api/stats",{userId:user.id});
+  let t=0,m=0;
+  const now=new Date();
   let html="";
-
   data.sort((a,b)=>b.id-a.id).forEach(x=>{
-    const d = new Date(x.id);
-
-    if(d.toDateString()===now.toDateString()) today+=Number(x.amount);
-    if(d.getMonth()===now.getMonth()) month+=Number(x.amount);
+    const d=new Date(x.id);
+    if(d.toDateString()===now.toDateString())t+=+x.amount;
+    if(d.getMonth()===now.getMonth())m+=+x.amount;
 
     html+=`
-    <li class="bg-black/30 p-2 rounded-xl flex justify-between">
-      <span>${x.cat} <span class="text-xs text-sky-400">(${x.name})</span></span>
-      <b>${x.amount}</b>
-    </li>`;
+    <div class="bg-black/30 p-3 rounded-xl flex justify-between items-center">
+      <div>${x.cat} <span class="text-xs text-sky-400">(${x.name})</span></div>
+      <div class="flex gap-3 items-center">
+        <b>${x.amount}</b>
+        <button onclick="del(${x.id})" class="text-red-400 text-xl">✖</button>
+      </div>
+    </div>`;
   });
+  st-today.innerText=t;
+  st-month.innerText=m;
+  history.innerHTML=html;
+}
 
-  document.getElementById("stat-today").innerText=today.toLocaleString();
-  document.getElementById("stat-month").innerText=month.toLocaleString();
-  document.getElementById("history").innerHTML=html;
+// -------- delete
+async function del(id){
+  await api("/api/delete",{userId:user.id,id});
+  tg.showAlert("O‘chirildi");
+  loadStats();
 }
 </script>
 
