@@ -1,228 +1,409 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-
-<title>Statistika</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Family Hub — Statistika</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
-body{
-  background:linear-gradient(180deg,#0f172a,#020617);
-  color:white;
-  font-family:Inter,system-ui;
-}
-.card{
-  background:#0b1220;
-  border:1px solid #1e293b;
-  border-radius:18px;
-  box-shadow:0 20px 40px rgba(0,0,0,.4);
-}
-input,textarea{
-  background:#020617 !important;
-  color:white !important;
-  border:1px solid #1e293b !important;
-  border-radius:14px;
-}
-.navbtn-active{
-  color:#38bdf8;
-}
+  :root{
+    --bg-1: linear-gradient(180deg,#071022,#04101a);
+    --card: rgba(255,255,255,0.03);
+    --muted: rgba(255,255,255,0.6);
+    --accent: #06b6d4; /* sky-400 */
+    --danger: #fb7185; /* red-400 */
+    --ok: #34d399; /* emerald-400 */
+  }
+  html,body{height:100%}
+  body{
+    margin:0;
+    min-height:100%;
+    background:var(--bg-1);
+    color:#fff;
+    font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
+  /* main container centered with phone-like width */
+  .app {
+    max-width:420px;
+    margin:18px auto 96px;
+    padding:18px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius:16px;
+    padding:14px;
+    box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+  }
+
+  .nav {
+    position:fixed;
+    bottom:12px;
+    left:50%;
+    transform:translateX(-50%);
+    width: min(420px, calc(100% - 24px));
+    background:rgba(2,6,23,0.6);
+    border:1px solid rgba(255,255,255,0.04);
+    backdrop-filter: blur(6px);
+    padding:8px;
+    border-radius:14px;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:6px;
+    z-index:40;
+  }
+
+  .nav button {
+    background:transparent;
+    border:0;
+    color:var(--muted);
+    font-weight:600;
+    padding:8px 4px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    cursor:pointer;
+  }
+
+  .nav button.active { color:var(--accent); }
+
+  input, textarea {
+    width:100%;
+    box-sizing:border-box;
+    padding:12px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,0.04);
+    background:rgba(255,255,255,0.02);
+    color: #fff;
+    outline: none;
+  }
+  input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.45); }
+
+  .btn {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding:12px 14px;
+    border-radius:12px;
+    border:0;
+    cursor:pointer;
+    font-weight:700;
+  }
+
+  .btn-primary { background: linear-gradient(90deg,#06b6d4,#3b82f6); color:#021328; }
+  .btn-danger { background: linear-gradient(90deg,#fb7185,#ef4444); color:white; }
+  .btn-ghost { background: transparent; border:1px solid rgba(255,255,255,0.04); color:var(--muted); }
+
+  .list-item { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:10px; border-radius:12px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.02); }
+  .muted { color: rgba(255,255,255,0.6); font-size:13px; }
+  .small { font-size:13px; color:rgba(255,255,255,0.7); }
+
+  /* responsive top spacing so nav doesn't overlap content */
+  .bottom-space { height:84px; }
 </style>
 </head>
+<body>
+  <div class="app">
+    <header class="mb-4">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <h1 style="margin:0;font-size:20px;font-weight:800;">💸 Family Hub</h1>
+          <div class="muted small">Oilaviy xarajatlar — oson va tez</div>
+        </div>
+        <div style="text-align:right">
+          <div id="userName" class="small muted">—</div>
+          <div id="userId" class="muted" style="font-family:monospace;font-size:12px"></div>
+        </div>
+      </div>
+    </header>
 
-<body class="p-4 pb-28">
+    <!-- ADD -->
+    <section id="tab-add" class="card mb-4">
+      <h2 style="margin:0 0 10px 0;font-weight:800">➕ Xarajat qo‘shish</h2>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <input id="amount" type="number" placeholder="Summa (masalan 12000)">
+        <input id="cat" type="text" placeholder="Nima olindi?">
+      </div>
+      <div style="display:flex;gap:8px">
+        <button id="saveBtn" class="btn btn-primary" onclick="addExpense()">💾 Saqlash</button>
+        <button class="btn btn-ghost" onclick="openTab('stats')">📊 Statistika</button>
+      </div>
+    </section>
 
-<h1 class="text-3xl font-bold text-center mb-4">💸 Family Hub</h1>
+    <!-- STATS -->
+    <section id="tab-stats" class="card mb-4 hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div>
+          <h3 style="margin:0;font-weight:800">📊 Statistika</h3>
+          <div class="muted small">Bugun va shu oy jami</div>
+        </div>
+        <div style="text-align:right">
+          <div class="small muted">Bugun</div>
+          <div id="stToday" style="font-weight:800;font-size:16px">0</div>
+        </div>
+      </div>
 
-<!-- NAV -->
-<div class="fixed bottom-0 left-0 w-full bg-black/50 backdrop-blur-lg border-t border-slate-700 p-2 grid grid-cols-4 text-center">
-  <button onclick="openTab('add')" id="nav-add">➕</button>
-  <button onclick="openTab('stats')" id="nav-stats">📊</button>
-  <button onclick="openTab('send')" id="nav-send">✉️</button>
-  <button onclick="openTab('family')" id="nav-family">👨‍👩‍👧‍👦</button>
-</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <div style="flex:1" class="small muted">Bu oy</div>
+        <div style="width:120px;text-align:right;font-weight:800" id="stMonth">0</div>
+      </div>
 
-<!-- ADD -->
-<div id="tab-add" class="card p-4 space-y-3 hidden">
+      <div style="height:8px"></div>
+      <div id="history" style="display:flex;flex-direction:column;gap:10px"></div>
+    </section>
 
-  <h2 class="font-bold text-xl">➕ Xarajat qo‘shish</h2>
+    <!-- SEND -->
+    <section id="tab-send" class="card mb-4 hidden">
+      <h3 style="margin:0 0 8px 0;font-weight:800">✉️ Oilaga xabar</h3>
+      <textarea id="msg" rows="4" placeholder="Xabar matni..."></textarea>
+      <div style="height:10px"></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" onclick="sendMessage()">📤 Yuborish</button>
+        <button class="btn btn-ghost" onclick="openTab('family')">👥 Oila</button>
+      </div>
+    </section>
 
-  <input id="amount" type="number" placeholder="Summa (12000)">
-  <input id="cat" type="text" placeholder="Masalan: Non, Taksi">
+    <!-- FAMILY -->
+    <section id="tab-family" class="card mb-4 hidden">
+      <h3 style="margin:0 0 8px 0;font-weight:800">👨‍👩‍👧‍👦 Oila boshqaruvi</h3>
 
-  <button onclick="addExpense()" class="w-full bg-sky-600 p-3 rounded-xl font-bold">💾 Saqlash</button>
+      <div id="connectBlock">
+        <input id="connectId" type="number" placeholder="Oila boshlig‘i ID (raqam)">
+        <div style="height:8px"></div>
+        <button class="btn btn-primary" onclick="connectFamily()">🔗 Ulanish so‘rash</button>
+        <div style="height:8px"></div>
+        <button class="btn btn-ghost" onclick="shareInvite()">📤 Oilani ulash (kontakt)</button>
+      </div>
 
-</div>
+      <div id="leaveBlock" class="hidden">
+        <div style="margin:10px 0" class="muted">Siz hozir oiladasiz</div>
+        <button class="btn btn-danger" onclick="confirmLeave()">🚪 Oiladan chiqish</button>
+      </div>
+    </section>
 
-<!-- STATS -->
-<div id="tab-stats" class="card p-4 space-y-3 hidden">
-
-  <h2 class="font-bold text-xl">📊 Statistika</h2>
-
-  <div class="flex justify-between bg-black/40 p-3 rounded-xl">
-    <span>Bugun</span><b id="st-today">0</b>
+    <div class="bottom-space"></div>
   </div>
 
-  <div class="flex justify-between bg-black/40 p-3 rounded-xl">
-    <span>Bu oy</span><b id="st-month">0</b>
-  </div>
-
-  <div class="h-px bg-slate-700 my-2"></div>
-
-  <div id="history" class="space-y-2 text-sm"></div>
-
-</div>
-
-<!-- SEND -->
-<div id="tab-send" class="card p-4 space-y-3 hidden">
-
-  <h2 class="font-bold text-xl">✉️ Xabar yuborish</h2>
-
-  <textarea id="msg" rows="3" placeholder="Xabar matni..."></textarea>
-
-  <button onclick="sendMessage()" class="w-full bg-emerald-600 p-3 rounded-xl font-bold">
-    📤 Yuborish
-  </button>
-
-</div>
-
-<!-- FAMILY -->
-<div id="tab-family" class="card p-4 space-y-3 hidden">
-
-  <h2 class="font-bold text-xl">👨‍👩‍👧‍👦 Oila</h2>
-
-  <div id="connect-block">
-    <input id="connectId" type="number" placeholder="Oila boshlig‘i ID">
-
-    <button onclick="connectFamily()" class="w-full bg-blue-600 p-3 rounded-xl font-bold">
-      🔗 Ulanish so‘rash
-    </button>
-
-    <button onclick="shareInvite()" class="w-full bg-purple-600 p-3 rounded-xl font-bold">
-      📤 Oilani ulash
-    </button>
-  </div>
-
-  <div id="leave-block" class="hidden">
-    <p class="text-emerald-400 font-bold">🔥 Sen oiladasan</p>
-
-    <button onclick="leaveFamily()" class="w-full bg-red-600 p-3 rounded-xl font-bold">
-      🚪 Oiladan chiqish
-    </button>
-  </div>
-
-</div>
+  <!-- bottom nav -->
+  <nav class="nav" role="navigation" aria-label="Main">
+    <button id="nav-add" onclick="openTab('add')" class="active">➕<div style="font-size:12px">Qo‘shish</div></button>
+    <button id="nav-stats" onclick="openTab('stats')">📊<div style="font-size:12px">Stat</div></button>
+    <button id="nav-send" onclick="openTab('send')">✉️<div style="font-size:12px">Xabar</div></button>
+    <button id="nav-family" onclick="openTab('family')">👥<div style="font-size:12px">Oila</div></button>
+  </nav>
 
 <script>
-const tg = window.Telegram.WebApp;
-tg.expand();
+  const tg = window.Telegram?.WebApp;
+  if (tg) { tg.expand(); }
 
-const API_URL = "https://asik.windowsnoutbook.workers.dev";
+  const API_URL = "https://asik.windowsnoutbook.workers.dev"; // <-- agar boshqacha bo'lsa o'zgartir
 
-const user = tg.initDataUnsafe.user || { id:"test", first_name:"Test" };
+  // current user info from Telegram WebApp (safe)
+  const user = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) ? tg.initDataUnsafe.user : { id: "test_user", first_name: "Test" };
+  document.getElementById("userName").innerText = user.first_name || "—";
+  document.getElementById("userId").innerText = user.id ? `ID: ${user.id}` : "";
 
-// -------- tabs
-function openTab(n){
-  document.querySelectorAll("[id^=tab-]").forEach(e=>e.classList.add("hidden"));
-  document.querySelectorAll("[id^=nav-]").forEach(e=>e.classList.remove("navbtn-active"));
-  document.getElementById("tab-"+n).classList.remove("hidden");
-  document.getElementById("nav-"+n).classList.add("navbtn-active");
-  if(n==="stats") loadStats();
-  if(n==="family") familyState();
-}
-openTab("add");
-
-// -------- API helper
-async function api(p,d){
-  const r = await fetch(API_URL+p,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json"},
-    body:JSON.stringify(d)
-  });
-  return r.json();
-}
-
-// -------- add
-async function addExpense(){
-  await api("/api/add",{userId:user.id,userName:user.first_name,amount:amount.value,cat:cat.value});
-  tg.showAlert("✔ Saqlandi");
-  amount.value="";cat.value="";
-}
-
-// -------- send
-async function sendMessage(){
-  await api("/api/send",{userId:user.id,userName:user.first_name,text:msg.value});
-  tg.showAlert("Yuborildi");
-  msg.value="";
-}
-
-// -------- connect
-async function connectFamily(){
-  await api("/api/connect",{userId:user.id,userName:user.first_name,targetId:connectId.value});
-  tg.showAlert("So‘rov yuborildi");
-}
-
-// -------- share
-function shareInvite(){
-  const text=`Ulanish uchun botga /connect ${user.id} deb yuboring`;
-  window.open("https://t.me/share/url?text="+encodeURIComponent(text),"_blank");
-}
-
-// -------- leave
-async function leaveFamily(){
-  await api("/api/unc",{userId:user.id});
-  tg.showAlert("Chiqding");
-  familyState();
-}
-
-// -------- family state
-async function familyState(){
-  const data=await api("/api/stats",{userId:user.id});
-  const mine=data.filter(x=>x.name===user.first_name).length;
-  if(data.length>mine){
-    connect-block.classList.add("hidden");
-    leave-block.classList.remove("hidden");
-  } else {
-    connect-block.classList.remove("hidden");
-    leave-block.classList.add("hidden");
+  // utility: safe API caller with error handling
+  async function api(path, body) {
+    try {
+      const res = await fetch(API_URL + path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) {
+        const txt = await res.text().catch(()=>res.statusText);
+        alert("Server xatosi: " + txt);
+        throw new Error("Server error");
+      }
+      return await res.json().catch(()=> ({}));
+    } catch (e) {
+      alert("Internet yoki API xatosi: " + (e.message || e));
+      throw e;
+    }
   }
-}
 
-// -------- stats
-async function loadStats(){
-  const data=await api("/api/stats",{userId:user.id});
-  let t=0,m=0;
-  const now=new Date();
-  let html="";
-  data.sort((a,b)=>b.id-a.id).forEach(x=>{
-    const d=new Date(x.id);
-    if(d.toDateString()===now.toDateString())t+=+x.amount;
-    if(d.getMonth()===now.getMonth())m+=+x.amount;
+  // tabs
+  function openTab(name) {
+    ["add","stats","send","family"].forEach(t => {
+      const el = document.getElementById("tab-" + t);
+      el.classList.toggle("hidden", t !== name);
+      // nav active
+      document.getElementById("nav-" + t).classList.toggle("active", t === name);
+    });
 
-    html+=`
-    <div class="bg-black/30 p-3 rounded-xl flex justify-between items-center">
-      <div>${x.cat} <span class="text-xs text-sky-400">(${x.name})</span></div>
-      <div class="flex gap-3 items-center">
-        <b>${x.amount}</b>
-        <button onclick="del(${x.id})" class="text-red-400 text-xl">✖</button>
-      </div>
-    </div>`;
-  });
-  st-today.innerText=t;
-  st-month.innerText=m;
-  history.innerHTML=html;
-}
+    if (name === "stats") loadStats();
+    if (name === "family") refreshFamilyState();
+  }
 
-// -------- delete
-async function del(id){
-  await api("/api/delete",{userId:user.id,id});
-  tg.showAlert("O‘chirildi");
-  loadStats();
-}
+  // add expense
+  async function addExpense() {
+    const amt = document.getElementById("amount").value.trim();
+    const cat = document.getElementById("cat").value.trim() || "noma'lum";
+    if (!amt) { alert("Summa kiriting"); return; }
+    document.getElementById("saveBtn").disabled = true;
+    try {
+      await api("/api/add", { userId: String(user.id), userName: user.first_name, amount: amt, cat });
+      tg?.showAlert?.("✅ Saqlandi");
+      document.getElementById("amount").value = "";
+      document.getElementById("cat").value = "";
+      loadStats(); // yangilash
+    } catch(e) {
+      // error shown in api()
+    } finally {
+      document.getElementById("saveBtn").disabled = false;
+    }
+  }
+
+  // send family message
+  async function sendMessage() {
+    const text = document.getElementById("msg").value.trim();
+    if (!text) { alert("Xabar yozing"); return; }
+    try {
+      await api("/api/send", { userId: String(user.id), userName: user.first_name, text });
+      tg?.showAlert?.("✉️ Yuborildi");
+      document.getElementById("msg").value = "";
+    } catch (e) {}
+  }
+
+  // connect from app (by entering owner id)
+  async function connectFamily() {
+    const target = document.getElementById("connectId").value.trim();
+    if (!target) { alert("Oila boshlig‘i ID kiriting"); return; }
+    try {
+      await api("/api/connect", { userId: String(user.id), userName: user.first_name, targetId: target });
+      tg?.showAlert?.("📨 So‘rov yuborildi");
+    } catch (e) {}
+  }
+
+  // share invite via contact (opens share sheet)
+  function shareInvite() {
+    const text = `Ulanish uchun botga /connect ${user.id} deb yuboring`;
+    const url = "https://t.me/share/url?text=" + encodeURIComponent(text);
+    window.open(url, "_blank");
+  }
+
+  // leave family (confirm then call)
+  async function confirmLeave() {
+    const ok = tg?.showConfirm ? tg.showConfirm("Oiladan chiqishni xohlaysizmi?") : confirm("Oiladan chiqishni xohlaysizmi?");
+    // tg.showConfirm returns boolean synchronously? If not, fallback to window.confirm
+    // For compatibility, if tg.showConfirm returns a Promise-like, handle that:
+    if (ok && typeof ok.then === "function") {
+      ok.then(async res => { if (res) await leaveFamily(); });
+    } else {
+      if (ok) await leaveFamily();
+    }
+  }
+  async function leaveFamily() {
+    try {
+      await api("/api/unc", { userId: String(user.id) });
+      tg?.showAlert?.("🚪 Chiqding");
+      refreshFamilyState();
+    } catch (e) {}
+  }
+
+  // family state: show connect UI or leave UI
+  async function refreshFamilyState() {
+    try {
+      const data = await api("/api/stats", { userId: String(user.id) });
+      const mineCount = data.filter(x => x.name === user.first_name).length;
+      const total = data.length;
+      const inFamily = total > mineCount;
+      document.getElementById("connectBlock").classList.toggle("hidden", inFamily);
+      document.getElementById("leaveBlock").classList.toggle("hidden", !inFamily);
+    } catch (e) {}
+  }
+
+  // stats: load list and totals
+  async function loadStats() {
+    try {
+      const data = await api("/api/stats", { userId: String(user.id) });
+      const now = new Date();
+      let today = 0, month = 0;
+      const container = document.getElementById("history");
+      container.innerHTML = "";
+
+      // sort desc
+      data.sort((a,b)=>b.id - a.id);
+
+      for (const x of data) {
+        const d = new Date(x.id);
+        const amount = Number(x.amount) || 0;
+        if (d.toDateString() === now.toDateString()) today += amount;
+        if (d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) month += amount;
+
+        // item node
+        const item = document.createElement("div");
+        item.className = "list-item";
+        item.innerHTML = `
+          <div style="min-width:0">
+            <div style="font-weight:700">${escapeHtml(x.cat)}</div>
+            <div class="muted small">${formatDate(d)} • ${escapeHtml(x.name)}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="font-weight:800">${amount.toLocaleString()}</div>
+            <button class="btn" style="background:transparent;padding:6px;border-radius:8px" title="O'chirish" onclick="confirmDelete(${x.id})">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18" stroke="#fb7185" stroke-width="2" stroke-linecap="round"/><path d="M8 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6" stroke="#fb7185" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        `;
+        container.appendChild(item);
+      }
+
+      document.getElementById("stToday").innerText = today.toLocaleString();
+      document.getElementById("stMonth").innerText = month.toLocaleString();
+    } catch (e) {
+      // handled in api()
+    }
+  }
+
+  // confirm and delete
+  function confirmDelete(id) {
+    const ok = tg?.showConfirm ? tg.showConfirm("Ushbu xarajatni o‘chirilsinmi?") : confirm("Ushbu xarajat o‘chirilsinmi?");
+    if (ok && typeof ok.then === "function") {
+      ok.then(async res => { if (res) await deleteExpense(id); });
+    } else {
+      if (ok) deleteExpense(id);
+    }
+  }
+  async function deleteExpense(id) {
+    try {
+      await api("/api/delete", { userId: String(user.id), id });
+      tg?.showAlert?.("🗑 O'chirildi");
+      loadStats();
+    } catch (e) {}
+  }
+
+  // small helpers
+  function formatDate(d) {
+    try {
+      return d.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) + " " + d.toLocaleDateString();
+    } catch (e) { return d.toString(); }
+  }
+  function escapeHtml(s) {
+    if (!s) return "";
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[c]);
+  }
+
+  // initial
+  (async ()=>{
+    // open default tab
+    openTab("add");
+
+    // try to refresh family state and stats
+    await refreshFamilyState();
+    // preload stats if needed:
+    // await loadStats();
+  })();
 </script>
-
 </body>
 </html>
