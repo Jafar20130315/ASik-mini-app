@@ -4,366 +4,295 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Ilova</title>
+
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
+
 <style>
   :root{
     --bg:#0b1220; --card:#071226; --muted:#9aa6b2; --accent:#0ea5a4; --danger:#ef4444;
   }
-  body{ margin:0; font-family:Inter,system-ui; background:linear-gradient(180deg,#061026,#02101a); color:#e6eef6; -webkit-font-smoothing:antialiased; }
+  body{
+    margin:0;
+    font-family:Inter,system-ui;
+    background:linear-gradient(180deg,#061026,#02101a);
+    color:#e6eef6;
+    -webkit-font-smoothing:antialiased;
+  }
   .app{ max-width:420px; margin:18px auto 96px; padding:16px; }
-  .card{ background:var(--card); border-radius:14px; padding:14px; box-shadow:0 18px 40px rgba(2,6,23,.6); border:1px solid rgba(255,255,255,0.03); }
+  .card{
+    background:var(--card);
+    border-radius:14px;
+    padding:14px;
+    box-shadow:0 18px 40px rgba(2,6,23,.6);
+    border:1px solid rgba(255,255,255,0.03);
+  }
   header{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
   .muted{ color:var(--muted); font-size:13px; }
-  input,textarea{ width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background:rgba(255,255,255,0.02); color:#e6eef6; }
+  input,textarea{
+    width:100%; padding:10px 12px; border-radius:10px;
+    border:1px solid rgba(255,255,255,0.04);
+    background:rgba(255,255,255,0.02);
+    color:#e6eef6;
+  }
   .row{ display:flex; gap:8px; align-items:center; }
   .btn{ cursor:pointer; border:0; padding:10px 12px; border-radius:10px; font-weight:700; }
   .btn-primary{ background:linear-gradient(90deg,var(--accent),#3b82f6); color:#041227; }
   .btn-ghost{ background:transparent; border:1px solid rgba(255,255,255,0.04); color:var(--muted); }
   .btn-danger{ background:linear-gradient(90deg,#fb7185,#ef4444); color:white; }
-  .nav{ position:fixed; bottom:12px; left:50%; transform:translateX(-50%); width:min(420px,calc(100% - 24px)); background:rgba(2,6,23,0.6); padding:10px; border-radius:14px; display:grid; grid-template-columns:repeat(4,1fr); gap:8px; border:1px solid rgba(255,255,255,0.03); }
-  .nav button{ background:transparent; color:var(--muted); border:0; display:flex; flex-direction:column; align-items:center; gap:6px; font-weight:700; }
+  .nav{
+    position:fixed; bottom:12px; left:50%; transform:translateX(-50%);
+    width:min(420px,calc(100% - 24px));
+    background:rgba(2,6,23,0.6);
+    padding:10px; border-radius:14px;
+    display:grid; grid-template-columns:repeat(4,1fr); gap:8px;
+    border:1px solid rgba(255,255,255,0.03);
+  }
+  .nav button{
+    background:transparent; color:var(--muted);
+    border:0; display:flex; flex-direction:column;
+    align-items:center; gap:6px; font-weight:700;
+  }
   .nav button.active{ color:var(--accent); }
-  .list-item{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px; border-radius:10px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.02); }
+  .list-item{
+    display:flex; justify-content:space-between; align-items:center;
+    gap:10px; padding:10px; border-radius:10px;
+    background:rgba(255,255,255,0.02);
+    border:1px solid rgba(255,255,255,0.02);
+  }
   .icon{ width:20px; height:20px; display:inline-block; }
   .family-list{ display:flex; flex-direction:column; gap:8px; }
 </style>
 </head>
+
 <body>
-  <div class="app">
-    <header>
-      <div>
-        <h1 style="margin:0;font-size:18px;font-weight:800">Family Hub</h1>
-        <div class="muted" id="sub">Oilaviy hisob-kitob</div>
-      </div>
-      <div style="text-align:right">
-        <div id="userName" style="font-weight:700">—</div>
-        <div class="muted" id="userId" style="font-family:monospace;font-size:12px"></div>
-      </div>
-    </header>
+<div class="app">
+<header>
+  <div>
+    <h1 style="margin:0;font-size:18px;font-weight:800">Family Hub</h1>
+    <div class="muted" id="sub">Oilaviy hisob-kitob</div>
+  </div>
+  <div style="text-align:right">
+    <div id="userName" style="font-weight:700">—</div>
+    <div class="muted" id="userId" style="font-family:monospace;font-size:12px"></div>
+  </div>
+</header>
 
-    <!-- ADD -->
-    <section id="tab-add" class="card mb-4">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <div style="font-weight:800">Xarajat qo‘shish</div>
-        <div class="muted small">Tez va aniq</div>
-      </div>
-
-      <div class="row" style="margin-bottom:8px">
-        <input id="amount" type="number" placeholder="Summa (12000)" />
-        <input id="cat" type="text" placeholder="Nima olindi? (Non, Taksi)" />
-      </div>
-
-      <div style="display:flex;gap:8px">
-        <button id="saveBtn" class="btn btn-primary" onclick="addExpense()">💾 Saqlash</button>
-        <button class="btn btn-ghost" onclick="openTab('stats')">📊 Ko‘rish</button>
-      </div>
-    </section>
-
-    <!-- STATS -->
-    <section id="tab-stats" class="card mb-4 hidden">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div style="font-weight:800">Statistika</div>
-        <div style="text-align:right">
-          <div class="muted small">Bugun</div>
-          <div id="stToday" style="font-weight:800">0</div>
-        </div>
-      </div>
-
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div class="muted small">Bu oy</div>
-        <div id="stMonth" style="font-weight:800">0</div>
-      </div>
-
-      <div id="history" style="display:flex;flex-direction:column;gap:8px"></div>
-    </section>
-
-    <!-- SEND -->
-    <section id="tab-send" class="card mb-4 hidden">
-      <div style="font-weight:800;margin-bottom:8px">Oilaga xabar</div>
-      <textarea id="msg" rows="4" placeholder="Xabar matni..."></textarea>
-      <div style="height:8px"></div>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-primary" onclick="sendMessage()">📤 Yuborish</button>
-        <button class="btn btn-ghost" onclick="openTab('family')">👥 Oila</button>
-      </div>
-    </section>
-
-    <!-- FAMILY -->
-    <section id="tab-family" class="card mb-4 hidden">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div style="font-weight:800">Oila</div>
-        <div class="muted small">Boshliq va a'zolar</div>
-      </div>
-
-      <div id="familyInfo" class="family-list"></div>
-
-      <div style="height:8px"></div>
-
-      <div id="connectBlock">
-        <input id="connectId" type="number" placeholder="Oila boshlig‘i ID" />
-        <div style="height:8px"></div>
-        <button class="btn btn-primary" onclick="connectFamily()">🔗 Ulanish so‘rash</button>
-        <div style="height:8px"></div>
-        <button class="btn btn-ghost" onclick="shareInvite()">📤 Oilani ulash</button>
-      </div>
-
-      <div id="leaveBlock" class="hidden" style="margin-top:10px">
-        <div class="muted" style="margin-bottom:8px">Siz hozir oiladasiz</div>
-        <button class="btn btn-danger" onclick="confirmLeave()">🚪 Oiladan chiqish</button>
-      </div>
-    </section>
-
-    <div style="height:84px"></div>
+<!-- ADD -->
+<section id="tab-add" class="card mb-4">
+  <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+    <div style="font-weight:800">Xarajat qo‘shish</div>
+    <div class="muted small">Tez va aniq</div>
   </div>
 
-  <nav class="nav" role="navigation">
-    <button id="nav-add" class="active" onclick="openTab('add')">
-      <!-- SVG icon (plus) -->
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5v14M5 12h14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Qo'shish
-    </button>
-    <button id="nav-stats" onclick="openTab('stats')">
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3v18h18" stroke-width="2" stroke-linecap="round"/><path d="M7 14v-4M12 14v-7M17 14v-10" stroke-width="2" stroke-linecap="round"/></svg>
-      Stat
-    </button>
-    <button id="nav-send" onclick="openTab('send')">
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 2L11 13" stroke-width="2" stroke-linecap="round"/><path d="M22 2l-7 20-4-9-9-4 20-7z" stroke-width="2" stroke-linecap="round"/></svg>
-      Xabar
-    </button>
-    <button id="nav-family" onclick="openTab('family')">
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 12c2.8 0 5-2.2 5-5s-2.2-5-5-5-5 2.2-5 5 2.2 5 5 5zM2 22c0-3.3 2.7-6 6-6h8c3.3 0 6 2.7 6 6" stroke-width="2" stroke-linecap="round"/></svg>
-      Oila
-    </button>
-  </nav>
+  <div class="row" style="margin-bottom:8px">
+    <input id="amount" type="number" placeholder="Summa (12000)">
+    <input id="cat" type="text" placeholder="Nima olindi? (Non, Taksi)">
+  </div>
+
+  <div style="display:flex;gap:8px">
+    <button id="saveBtn" class="btn btn-primary" onclick="addExpense()">💾 Saqlash</button>
+    <button class="btn btn-ghost" onclick="openTab('stats')">📊 Ko‘rish</button>
+  </div>
+</section>
+
+<!-- STATS -->
+<section id="tab-stats" class="card mb-4 hidden">
+  <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+    <div style="font-weight:800">Statistika</div>
+    <div style="text-align:right">
+      <div class="muted small">Bugun</div>
+      <div id="stToday" style="font-weight:800">0</div>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+    <div class="muted small">Bu oy</div>
+    <div id="stMonth" style="font-weight:800">0</div>
+  </div>
+
+  <div id="history" style="display:flex;flex-direction:column;gap:8px"></div>
+
+  <div style="margin-top:12px;font-weight:800">📅 Kalendar bo‘yicha</div>
+  <div id="calendar" style="display:flex;flex-direction:column;gap:8px"></div>
+</section>
+
+<!-- SEND -->
+<section id="tab-send" class="card mb-4 hidden">
+  <div style="font-weight:800;margin-bottom:8px">Oilaga xabar</div>
+  <textarea id="msg" rows="4" placeholder="Xabar matni..."></textarea>
+  <div style="height:8px"></div>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-primary" onclick="sendMessage()">📤 Yuborish</button>
+    <button class="btn btn-ghost" onclick="openTab('family')">👥 Oila</button>
+  </div>
+</section>
+
+<!-- FAMILY -->
+<section id="tab-family" class="card mb-4 hidden">
+  <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+    <div style="font-weight:800">Oila</div>
+    <div class="muted small">Boshliq va a'zolar</div>
+  </div>
+
+  <div id="familyInfo" class="family-list"></div>
+
+  <div style="height:8px"></div>
+
+  <div id="connectBlock">
+    <input id="connectId" type="number" placeholder="Oila boshlig‘i ID">
+    <div style="height:8px"></div>
+    <button class="btn btn-primary" onclick="connectFamily()">🔗 Ulanish so‘rash</button>
+    <div style="height:8px"></div>
+    <button class="btn btn-ghost" onclick="shareInvite()">📤 Oilani ulash</button>
+  </div>
+
+  <div id="leaveBlock" class="hidden" style="margin-top:10px">
+    <div class="muted" style="margin-bottom:8px">Siz hozir oiladasiz</div>
+    <button class="btn btn-danger" onclick="confirmLeave()">🚪 Oiladan chiqish</button>
+  </div>
+</section>
+
+<div style="height:84px"></div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <button id="nav-add" class="active" onclick="openTab('add')">
+    ➕
+    Qo‘shish
+  </button>
+  <button id="nav-stats" onclick="openTab('stats')">📊 Stat</button>
+  <button id="nav-send" onclick="openTab('send')">✉️ Xabar</button>
+  <button id="nav-family" onclick="openTab('family')">👥 Oila</button>
+</nav>
 
 <script>
-  const tg = window.Telegram?.WebApp;
-  if (tg && tg.expand) tg.expand();
+const tg = window.Telegram?.WebApp;
+tg?.expand?.();
 
-  const API_URL = "https://asik.windowsnoutbook.workers.dev"; // <-- ALMASHTIR
+const API_URL = "https://asik.windowsnoutbook.workers.dev"; // ⬅️ o'zingnikiga almashtir
 
-  const user = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) ? tg.initDataUnsafe.user : { id: "test_user", first_name: "Test" };
-  document.getElementById("userName").innerText = user.first_name || "—";
-  document.getElementById("userId").innerText = user.id ? `ID: ${user.id}` : "";
+const user = tg?.initDataUnsafe?.user || { id:"test_user", first_name:"Test" };
+document.getElementById("userName").innerText = user.first_name;
+document.getElementById("userId").innerText = "ID: " + user.id;
 
-  // Helper: API with error display
-  async function api(path, body) {
-    try {
-      const res = await fetch(API_URL + path, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-      });
-      if (!res.ok) {
-        const txt = await res.text().catch(()=>res.statusText);
-        alert("Server xatosi: " + txt);
-        throw new Error("Server error");
-      }
-      return await res.json().catch(()=>({}));
-    } catch (e) {
-      alert("Internet yoki API xatosi: " + (e.message || e));
-      throw e;
+// API helper
+async function api(path, body){
+  const r = await fetch(API_URL + path,{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify(body)
+  });
+  return r.json();
+}
+
+// Tabs
+function openTab(n){
+  ["add","stats","send","family"].forEach(t=>{
+    document.getElementById("tab-"+t).classList.toggle("hidden",t!==n);
+    document.getElementById("nav-"+t)?.classList?.toggle("active",t===n);
+  });
+  if(n==="stats") loadStats();
+  if(n==="family") refreshFamily();
+}
+
+// ADD EXPENSE
+async function addExpense(){
+  const amt=document.getElementById("amount").value.trim();
+  const cat=document.getElementById("cat").value.trim()||"noma'lum";
+  if(!amt) return alert("Summa kiriting");
+
+  await api("/api/add",{userId:String(user.id),userName:user.first_name,amount:amt,cat});
+  tg?.showAlert?.("✔️ Saqlandi");
+
+  document.getElementById("amount").value="";
+  document.getElementById("cat").value="";
+  loadStats();
+}
+
+// LOAD STATS + CALENDAR
+async function loadStats(){
+  const data=await api("/api/stats",{userId:String(user.id)});
+  const now=new Date();
+  let today=0, month=0;
+
+  const history=document.getElementById("history");
+  const calendar=document.getElementById("calendar");
+  history.innerHTML=""; calendar.innerHTML="";
+
+  data.sort((a,b)=>b.id-a.id);
+
+  const byDate={};
+
+  for(const x of data){
+    const d=new Date(x.createdAt||x.id);
+    const key=d.toISOString().split("T")[0];
+    const amount=Number(x.amount)||0;
+
+    if(d.toDateString()===now.toDateString()) today+=amount;
+    if(d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear()) month+=amount;
+
+    if(!byDate[key]) byDate[key]=[];
+    byDate[key].push(x);
+
+    const item=document.createElement("div");
+    item.className="list-item";
+    item.innerHTML=`<div><div style="font-weight:700">${x.cat}</div><div class="muted small">${d.toLocaleString()}</div></div><div style="font-weight:800">${amount.toLocaleString()}</div>`;
+    history.appendChild(item);
+  }
+
+  // calendar
+  for(const day in byDate){
+    const block=document.createElement("div");
+    block.className="card";
+    const d=new Date(day);
+    let sum=0;
+    byDate[day].forEach(x=>sum+=Number(x.amount)||0);
+
+    let html=`<div style="font-weight:800;margin-bottom:6px">${d.toLocaleDateString()} — ${sum.toLocaleString()} so'm</div>`;
+    for(const x of byDate[day]){
+      html+=`<div class="list-item"><div>${x.cat}</div><div style="font-weight:700">${Number(x.amount).toLocaleString()}</div></div>`;
     }
+    block.innerHTML=html;
+    calendar.appendChild(block);
   }
 
-  // Tabs
-  function openTab(n) {
-    ["add","stats","send","family"].forEach(t => {
-      document.getElementById("tab-"+t).classList.toggle("hidden", t !== n);
-      document.getElementById("nav-"+t).classList.toggle("active", t === n);
-    });
-    if (n === "stats") loadStats();
-    if (n === "family") refreshFamily();
-  }
-  openTab("add");
+  document.getElementById("stToday").innerText=today.toLocaleString();
+  document.getElementById("stMonth").innerText=month.toLocaleString();
+}
 
-  // Add expense
-  async function addExpense(){
-    const amt = document.getElementById("amount").value.trim();
-    const cat = document.getElementById("cat").value.trim() || "noma'lum";
-    if (!amt) { alert("Summa kiriting"); return; }
-    document.getElementById("saveBtn").disabled = true;
-    try {
-      await api("/api/add", { userId: String(user.id), userName: user.first_name, amount: amt, cat });
-      tg?.showAlert?.("✅ Saqlandi");
-      document.getElementById("amount").value = "";
-      document.getElementById("cat").value = "";
-      loadStats();
-    } catch(e){}
-    document.getElementById("saveBtn").disabled = false;
-  }
+// SEND MESSAGE
+async function sendMessage(){
+  const text=document.getElementById("msg").value.trim();
+  if(!text) return alert("Matn yozing");
+  await api("/api/send",{userId:String(user.id),userName:user.first_name,text});
+  document.getElementById("msg").value="";
+}
 
-  // Load stats (items include ownerId)
-  async function loadStats(){
-    try {
-      const data = await api("/api/stats", { userId: String(user.id) });
-      let today = 0, month = 0;
-      const now = new Date();
-      const container = document.getElementById("history");
-      container.innerHTML = "";
+// FAMILY
+async function connectFamily(){
+  const id=document.getElementById("connectId").value.trim();
+  await api("/api/connect",{userId:String(user.id),userName:user.first_name,targetId:id});
+}
 
-      data.sort((a,b)=>b.id - a.id);
+function shareInvite(){
+  const text=`Ulanish uchun botga /connect ${user.id} deb yuboring`;
+  window.open("https://t.me/share/url?text="+encodeURIComponent(text));
+}
 
-      for (const x of data) {
-        const d = new Date(x.id);
-        const amount = Number(x.amount) || 0;
-        if (d.toDateString() === now.toDateString()) today += amount;
-        if (d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) month += amount;
-
-        // list item
-        const div = document.createElement("div");
-        div.className = "list-item";
-        const left = document.createElement("div");
-        left.style.minWidth = "0";
-        left.innerHTML = `<div style="font-weight:700">${escapeHtml(x.cat)}</div><div class="muted small">${formatDate(d)} • ${escapeHtml(x.name)}</div>`;
-        const right = document.createElement("div");
-        right.style.display = "flex"; right.style.alignItems = "center"; right.style.gap = "8px";
-
-        const amtDiv = document.createElement("div"); amtDiv.style.fontWeight = "800"; amtDiv.innerText = amount.toLocaleString();
-
-        // Delete button: only show if requester is in same family (we assume app user is in family; backend enforces permission)
-        const delBtn = document.createElement("button");
-        delBtn.className = "btn";
-        delBtn.title = "O'chirish";
-        delBtn.style.background = "transparent";
-        delBtn.innerHTML = `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18" stroke-width="2" stroke-linecap="round"/><path d="M8 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6" stroke-width="2" stroke-linecap="round"/></svg>`;
-        delBtn.onclick = () => confirmDelete(x.id, x.ownerId, x.cat);
-
-        right.appendChild(amtDiv);
-        right.appendChild(delBtn);
-
-        div.appendChild(left);
-        div.appendChild(right);
-        container.appendChild(div);
-      }
-
-      document.getElementById("stToday").innerText = today.toLocaleString();
-      document.getElementById("stMonth").innerText = month.toLocaleString();
-
-    } catch (e) {}
-  }
-
-  // confirm delete (calls /api/delete with targetUserId)
-  function confirmDelete(id, ownerId, cat) {
-    const q = `“${cat}” xarajatni o‘chirilsinmi?`;
-    const conf = tg?.showConfirm ? tg.showConfirm(q) : confirm(q);
-    if (conf && typeof conf.then === "function") {
-      conf.then(async res => { if (res) await deleteExpense(id, ownerId); });
-    } else {
-      if (conf) deleteExpense(id, ownerId);
-    }
-  }
-  async function deleteExpense(id, targetUserId) {
-    try {
-      await api("/api/delete", { userId: String(user.id), id, targetUserId: String(targetUserId) });
-      tg?.showAlert?.("🗑 O'chirildi");
-      loadStats();
-    } catch (e) {}
-  }
-
-  // send family message
-  async function sendMessage(){
-    const text = document.getElementById("msg").value.trim();
-    if (!text) { alert("Xabar yozing"); return; }
-    try {
-      await api("/api/send", { userId: String(user.id), userName: user.first_name, text });
-      tg?.showAlert?.("✉️ Yuborildi");
-      document.getElementById("msg").value = "";
-    } catch (e){}
-  }
-
-  // connect family
-  async function connectFamily(){
-    const target = document.getElementById("connectId").value.trim();
-    if (!target) { alert("Oila boshlig‘i ID kiriting"); return; }
-    try {
-      await api("/api/connect", { userId: String(user.id), userName: user.first_name, targetId: target });
-      tg?.showAlert?.("📨 So‘rov yuborildi");
-    } catch (e){}
-  }
-
-  // share invite
-  function shareInvite(){
-    const text = `Ulanish uchun botga /connect ${user.id} deb yuboring`;
-    window.open("https://t.me/share/url?text="+encodeURIComponent(text), "_blank");
-  }
-
-  // leave family
-  function confirmLeave(){
-    const q = "Oiladan chiqmoqchimisiz?";
-    const conf = tg?.showConfirm ? tg.showConfirm(q) : confirm(q);
-    if (conf && typeof conf.then === "function") {
-      conf.then(async res => { if (res) await leaveFamily(); });
-    } else {
-      if (conf) leaveFamily();
-    }
-  }
-  async function leaveFamily(){
-    try {
-      await api("/api/unc", { userId: String(user.id) });
-      tg?.showAlert?.("🚪 Chiqding");
-      refreshFamilyUI();
-    } catch (e){}
-  }
-
-  // refresh family UI
-  async function refreshFamily(){
-    try {
-      const f = await api("/api/family", { userId: String(user.id) });
-      // show leader and members
-      const container = document.getElementById("familyInfo");
-      container.innerHTML = "";
-      const leaderDiv = document.createElement("div");
-      leaderDiv.className = "list-item";
-      leaderDiv.innerHTML = `<div style="display:flex;gap:10px;align-items:center"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 12c2.8 0 5-2.2 5-5s-2.2-5-5-5-5 2.2-5 5 2.2 5 5 5z"/><path d="M2 22c0-3.3 2.7-6 6-6h8c3.3 0 6 2.7 6 6"/></svg><div><div style="font-weight:800">Boshliq</div><div class="muted small" style="font-family:monospace">${escapeHtml(f.leader)}</div></div></div>`;
-      container.appendChild(leaderDiv);
-
-      if (Array.isArray(f.members) && f.members.length) {
-        const title = document.createElement("div");
-        title.style.marginTop = "8px";
-        title.className = "muted small";
-        title.innerText = "A'zolar";
-        container.appendChild(title);
-
-        for (const m of f.members) {
-          const mdiv = document.createElement("div");
-          mdiv.className = "list-item";
-          mdiv.innerHTML = `<div style="display:flex;gap:10px;align-items:center"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3zM8 11c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3zM2 20c0-2.2 3.1-4 6-4s6 1.8 6 4"/></svg><div><div style="font-weight:700">ID: ${escapeHtml(m)}</div></div></div>`;
-          container.appendChild(mdiv);
-        }
-      } else {
-        const msg = document.createElement("div");
-        msg.className = "muted";
-        msg.style.marginTop = "8px";
-        msg.innerText = "A'zolar topilmadi";
-        container.appendChild(msg);
-      }
-
-      refreshFamilyUI(); // toggle connect/leave blocks
-    } catch (e) {}
-  }
-
-  // update connect/leave UI based on family membership
-  async function refreshFamilyUI(){
-    try {
-      const data = await api("/api/stats", { userId: String(user.id) });
-      const mineCount = data.filter(x => x.ownerId === String(user.id)).length;
-      const inFamily = data.length > mineCount;
-      document.getElementById("connectBlock").classList.toggle("hidden", inFamily);
-      document.getElementById("leaveBlock").classList.toggle("hidden", !inFamily);
-    } catch (e){}
-  }
-
-  // helpers
-  function formatDate(d){
-    try { return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) + " " + d.toLocaleDateString(); }
-    catch(e){ return new Date(d).toString(); }
-  }
-  function escapeHtml(s){ if(!s) return ""; return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c])); }
-
-  // init
-  (async ()=>{ openTab("add"); await refreshFamily(); })();
+async function refreshFamily(){
+  const f=await api("/api/family",{userId:String(user.id)});
+  const box=document.getElementById("familyInfo");
+  box.innerHTML=`<div class="list-item"><b>Boshliq:</b> ${f.leader}</div>`;
+  f.members?.forEach(m=>{
+    const d=document.createElement("div");
+    d.className="list-item";
+    d.innerText="👤 "+m;
+    box.appendChild(d);
+  });
+}
 </script>
+
 </body>
 </html>
