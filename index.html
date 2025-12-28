@@ -2,192 +2,354 @@
 <html lang="uz">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>Ilova</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
+<!-- Ulanamiz Phosphor Icons (Vector ikonkalari) -->
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
 
 <style>
-  :root{
-    --bg:#0b1220; --card:#071226; --muted:#9aa6b2; --accent:#0ea5a4; --danger:#ef4444;
+  :root {
+    /* Jiddiy va Kontrastli ranglar palitrasi */
+    --bg: #000000;         
+    --card: #1c1c1e;       
+    --text-main: #ffffff;  
+    --text-muted: #b0b0b0; 
+    
+    /* Yorqin aksent ranglar */
+    --accent: #007AFF;     
+    --success: #30D158;    
+    --danger: #FF453A;     
+    --border: #38383A;     
+    
+    --radius: 12px;
   }
-  body{
-    margin:0;
-    font-family:Inter,system-ui;
-    background:linear-gradient(180deg,#061026,#02101a);
-    color:#e6eef6;
-    -webkit-font-smoothing:antialiased;
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg);
+    color: var(--text-main);
+    font-size: 16px; 
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
   }
-  .app{ max-width:420px; margin:18px auto 96px; padding:16px; }
-  .card{
-    background:var(--card);
-    border-radius:14px;
-    padding:14px;
-    box-shadow:0 18px 40px rgba(2,6,23,.6);
-    border:1px solid rgba(255,255,255,0.03);
+
+  /* Katta yoshdagilar uchun qulay oraliqlar */
+  .app { 
+    max-width: 460px; 
+    margin: 0 auto 100px; 
+    padding: 20px; 
   }
-  header{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
-  .muted{ color:var(--muted); font-size:13px; }
-  input,textarea{
-    width:100%; padding:10px 12px; border-radius:10px;
-    border:1px solid rgba(255,255,255,0.04);
-    background:rgba(255,255,255,0.02);
-    color:#e6eef6;
+
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 18px;
+    border: 1px solid var(--border); 
+    margin-bottom: 20px;
   }
-  .row{ display:flex; gap:8px; align-items:center; }
-  .btn{ cursor:pointer; border:0; padding:10px 12px; border-radius:10px; font-weight:700; }
-  .btn-primary{ background:linear-gradient(90deg,var(--accent),#3b82f6); color:#041227; }
-  .btn-ghost{ background:transparent; border:1px solid rgba(255,255,255,0.04); color:var(--muted); }
-  .btn-danger{ background:linear-gradient(90deg,#fb7185,#ef4444); color:white; }
-  .nav{
-    position:fixed; bottom:12px; left:50%; transform:translateX(-50%);
-    width:min(420px,calc(100% - 24px));
-    background:rgba(2,6,23,0.6);
-    padding:10px; border-radius:14px;
-    display:grid; grid-template-columns:repeat(4,1fr); gap:8px;
-    border:1px solid rgba(255,255,255,0.03);
+
+  header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    gap: 12px; 
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
   }
-  .nav button{
-    background:transparent; color:var(--muted);
-    border:0; display:flex; flex-direction:column;
-    align-items:center; gap:6px; font-weight:700;
+
+  h1 { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
+  
+  .muted { 
+    color: var(--text-muted); 
+    font-size: 14px; 
+    font-weight: 500;
   }
-  .nav button.active{ color:var(--accent); }
-  .list-item{
-    display:flex; justify-content:space-between; align-items:center;
-    gap:10px; padding:10px; border-radius:10px;
-    background:rgba(255,255,255,0.02);
-    border:1px solid rgba(255,255,255,0.02);
+
+  /* Kiritish maydonlari (Input) */
+  input, textarea {
+    width: 100%; 
+    padding: 14px; 
+    font-size: 17px; 
+    border-radius: var(--radius);
+    border: 1px solid #555; 
+    background: #2C2C2E;
+    color: #fff;
+    outline: none;
+    transition: border-color 0.2s;
   }
-  .icon{ width:20px; height:20px; display:inline-block; }
-  .family-list{ display:flex; flex-direction:column; gap:8px; }
+  
+  input:focus, textarea:focus {
+    border-color: var(--accent);
+    background: #3a3a3c;
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: #888;
+  }
+
+  .row { display: flex; gap: 12px; align-items: center; }
+
+  /* Tugmalar (Buttons) */
+  .btn { 
+    cursor: pointer; 
+    border: none; 
+    padding: 14px 20px; 
+    border-radius: var(--radius); 
+    font-size: 16px;
+    font-weight: 600; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: opacity 0.2s;
+  }
+  
+  .btn i {
+    font-size: 20px; /* Ikonka o'lchami */
+  }
+  
+  .btn:active { opacity: 0.7; }
+
+  .btn-primary { 
+    background-color: var(--accent); 
+    color: white; 
+  }
+
+  .btn-ghost { 
+    background: #3A3A3C; 
+    color: var(--text-main); 
+    border: 1px solid var(--border);
+  }
+  
+  .btn-danger { 
+    background-color: var(--danger); 
+    color: white; 
+  }
+
+  /* Pastki menyu (Navigation) */
+  .nav {
+    position: fixed; 
+    bottom: 0; 
+    left: 0;
+    width: 100%;
+    background: #161618;
+    padding: 12px 10px 24px 10px; 
+    display: grid; 
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 8px;
+    border-top: 1px solid var(--border);
+    z-index: 100;
+  }
+
+  .nav button {
+    background: transparent; 
+    color: #666;
+    border: 0; 
+    display: flex; 
+    flex-direction: column;
+    align-items: center; 
+    gap: 6px; 
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px;
+  }
+  
+  .nav button i {
+    font-size: 26px; /* Navigatsiya ikonkalari kattaroq */
+    margin-bottom: 2px;
+  }
+
+  .nav button.active { 
+    color: var(--accent); 
+  }
+
+  /* Ro'yxat elementlari */
+  .list-item {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    gap: 15px; 
+    padding: 14px; 
+    border-radius: 8px;
+    background: #242426;
+    border-bottom: 1px solid #333;
+    margin-bottom: 8px;
+  }
+  
+  .big-text { font-size: 18px; font-weight: 700; display:flex; align-items:center; gap:8px; }
+  
+  .family-list { display: flex; flex-direction: column; gap: 10px; }
+  
+  /* Helper classes */
+  .hidden { display: none !important; }
+  .mb-4 { margin-bottom: 20px; }
 </style>
 </head>
 
 <body>
 <div class="app">
-<header>
-  <div>
-    <h1 style="margin:0;font-size:18px;font-weight:800">Family Hub</h1>
-    <div class="muted" id="sub">Oilaviy hisob-kitob</div>
-  </div>
-  <div style="text-align:right">
-    <div id="userName" style="font-weight:700">—</div>
-    <div class="muted" id="userId" style="font-family:monospace;font-size:12px"></div>
-  </div>
-</header>
-
-<!-- ADD -->
-<section id="tab-add" class="card mb-4">
-  <div style="display:flex;justify-content:space-between;margin-bottom:10px">
-    <div style="font-weight:800">Xarajat qo‘shish</div>
-    <div class="muted small">Tez va aniq</div>
-  </div>
-
-  <div class="row" style="margin-bottom:8px">
-    <input id="amount" type="number" placeholder="Summa (12000)">
-    <input id="cat" type="text" placeholder="Nima olindi? (Non, Taksi)">
-  </div>
-
-  <div style="display:flex;gap:8px">
-    <button id="saveBtn" class="btn btn-primary" onclick="addExpense()">💾 Saqlash</button>
-    <button class="btn btn-ghost" onclick="openTab('stats')">📊 Ko‘rish</button>
-  </div>
-</section>
-
-<!-- STATS -->
-<section id="tab-stats" class="card mb-4 hidden">
-  <div style="display:flex;justify-content:space-between;margin-bottom:12px">
-    <div style="font-weight:800">Statistika</div>
-    <div style="text-align:right">
-      <div class="muted small">Bugun</div>
-      <div id="stToday" style="font-weight:800">0</div>
+  <header>
+    <div>
+      <h1 style="margin:0;">Family Hub</h1>
+      <div class="muted" id="sub">Oilaviy hamyon</div>
     </div>
-  </div>
+    <div style="text-align:right">
+      <div id="userName" style="font-size:18px; font-weight:600; color:var(--accent)">—</div>
+      <div class="muted" id="userId" style="font-family:monospace; font-size:14px"></div>
+    </div>
+  </header>
 
-  <div style="display:flex;justify-content:space-between;margin-bottom:12px">
-    <div class="muted small">Bu oy</div>
-    <div id="stMonth" style="font-weight:800">0</div>
-  </div>
+  <!-- ADD -->
+  <section id="tab-add" class="card mb-4">
+    <div style="display:flex;justify-content:space-between;margin-bottom:15px; align-items:center;">
+      <div style="font-weight:700; font-size:18px;">Xarajat kiritish</div>
+    </div>
 
-  <div id="history" style="display:flex;flex-direction:column;gap:8px"></div>
+    <div class="row" style="margin-bottom:15px; flex-direction:column; align-items:stretch;">
+      <input id="amount" type="number" placeholder="Summa (masalan: 12000)" style="font-size:20px; font-weight:bold;">
+      <input id="cat" type="text" placeholder="Nima olindi? (Non, Go'sht)">
+    </div>
 
-  <div style="margin-top:12px;font-weight:800">📅 Kalendar bo‘yicha</div>
-  <div id="calendar" style="display:flex;flex-direction:column;gap:8px"></div>
-</section>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px">
+      <button id="saveBtn" class="btn btn-primary" onclick="addExpense()">
+        <i class="ph-bold ph-floppy-disk"></i> Saqlash
+      </button>
+      <button class="btn btn-ghost" onclick="openTab('stats')">
+        <i class="ph-bold ph-chart-bar"></i> Ko‘rish
+      </button>
+    </div>
+  </section>
 
-<!-- SEND -->
-<section id="tab-send" class="card mb-4 hidden">
-  <div style="font-weight:800;margin-bottom:8px">Oilaga xabar</div>
-  <textarea id="msg" rows="4" placeholder="Xabar matni..."></textarea>
-  <div style="height:8px"></div>
-  <div style="display:flex;gap:8px">
-    <button class="btn btn-primary" onclick="sendMessage()">📤 Yuborish</button>
-    <button class="btn btn-ghost" onclick="openTab('family')">👥 Oila</button>
-  </div>
-</section>
+  <!-- STATS -->
+  <section id="tab-stats" class="card mb-4 hidden">
+    <div style="display:flex;justify-content:space-between;margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:10px;">
+      <div style="font-weight:700; font-size:18px">Statistika</div>
+      <div style="text-align:right">
+        <div class="muted">Bugun</div>
+        <div id="stToday" style="font-weight:700; font-size:20px; color:var(--success)">0</div>
+      </div>
+    </div>
 
-<!-- FAMILY -->
-<section id="tab-family" class="card mb-4 hidden">
-  <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-    <div style="font-weight:800">Oila</div>
-    <div class="muted small">Boshliq va a'zolar</div>
-  </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:20px">
+      <div class="muted" style="font-size:16px">Jami (oy):</div>
+      <div id="stMonth" style="font-weight:700; font-size:20px; color:var(--accent)">0</div>
+    </div>
 
-  <div id="familyInfo" class="family-list"></div>
+    <div id="history" style="display:flex;flex-direction:column;gap:8px"></div>
 
-  <div style="height:8px"></div>
+    <div style="margin-top:25px; margin-bottom:15px; font-weight:700; font-size:18px; color:var(--text-muted); display:flex; align-items:center; gap:8px">
+      <i class="ph-bold ph-calendar-blank"></i> Tarix bo'yicha
+    </div>
+    <div id="calendar" style="display:flex;flex-direction:column;gap:12px"></div>
+  </section>
 
-  <div id="connectBlock">
-    <input id="connectId" type="number" placeholder="Oila boshlig‘i ID">
-    <div style="height:8px"></div>
-    <button class="btn btn-primary" onclick="connectFamily()">🔗 Ulanish so‘rash</button>
-    <div style="height:8px"></div>
-    <button class="btn btn-ghost" onclick="shareInvite()">📤 Oilani ulash</button>
-  </div>
+  <!-- SEND -->
+  <section id="tab-send" class="card mb-4 hidden">
+    <div style="font-weight:700; font-size:18px; margin-bottom:15px">Oilaga xabar yozish</div>
+    <textarea id="msg" rows="5" placeholder="Xabarni shu yerga yozing..."></textarea>
+    <div style="height:15px"></div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px">
+      <button class="btn btn-primary" onclick="sendMessage()">
+        <i class="ph-bold ph-paper-plane-right"></i> Yuborish
+      </button>
+      <button class="btn btn-ghost" onclick="openTab('family')">
+        <i class="ph-bold ph-users"></i> Oila
+      </button>
+    </div>
+  </section>
 
-  <div id="leaveBlock" class="hidden" style="margin-top:10px">
-    <div class="muted" style="margin-bottom:8px">Siz hozir oiladasiz</div>
-    <button class="btn btn-danger" onclick="confirmLeave()">🚪 Oiladan chiqish</button>
-  </div>
-</section>
+  <!-- FAMILY -->
+  <section id="tab-family" class="card mb-4 hidden">
+    <div style="display:flex;justify-content:space-between;margin-bottom:15px">
+      <div style="font-weight:700; font-size:18px">Oila a'zolari</div>
+    </div>
 
-<div style="height:84px"></div>
+    <div id="familyInfo" class="family-list"></div>
+
+    <div style="height:20px; border-top:1px solid #333; margin-top:10px;"></div>
+
+    <div id="connectBlock">
+      <label class="muted" style="display:block; margin-bottom:8px">Boshqa oilaga qo'shilish:</label>
+      <input id="connectId" type="number" placeholder="Oila boshlig‘i ID raqami">
+      <div style="height:12px"></div>
+      <button class="btn btn-primary" style="width:100%" onclick="connectFamily()">
+        <i class="ph-bold ph-link"></i> Ulanish so‘rash
+      </button>
+      <div style="height:12px"></div>
+      <button class="btn btn-ghost" style="width:100%" onclick="shareInvite()">
+        <i class="ph-bold ph-share-network"></i> Taklif qilish (Link)
+      </button>
+    </div>
+
+    <div id="leaveBlock" class="hidden" style="margin-top:20px; border-top:1px solid #333; padding-top:20px;">
+      <button class="btn btn-danger" style="width:100%" onclick="confirmLeave()">
+        <i class="ph-bold ph-sign-out"></i> Oiladan chiqish
+      </button>
+    </div>
+  </section>
+
+  <div style="height:80px"></div>
 </div>
 
 <!-- NAV -->
 <nav class="nav">
   <button id="nav-add" class="active" onclick="openTab('add')">
-    ➕
+    <i class="ph-bold ph-plus-circle"></i>
     Qo‘shish
   </button>
-  <button id="nav-stats" onclick="openTab('stats')">📊 Stat</button>
-  <button id="nav-send" onclick="openTab('send')">✉️ Xabar</button>
-  <button id="nav-family" onclick="openTab('family')">👥 Oila</button>
+  <button id="nav-stats" onclick="openTab('stats')">
+    <i class="ph-bold ph-chart-bar"></i>
+    Hisobot
+  </button>
+  <button id="nav-send" onclick="openTab('send')">
+    <i class="ph-bold ph-envelope-simple"></i>
+    Xabar
+  </button>
+  <button id="nav-family" onclick="openTab('family')">
+    <i class="ph-bold ph-users-three"></i>
+    Oila
+  </button>
 </nav>
 
 <script>
 const tg = window.Telegram?.WebApp;
 tg?.expand?.();
 
-const API_URL = "https://asik.windowsnoutbook.workers.dev"; // ⬅️ o'zingnikiga almashtir
+if (tg) {
+    tg.setHeaderColor('#1c1c1e');
+    tg.setBackgroundColor('#000000');
+}
+
+const API_URL = "https://asik.windowsnoutbook.workers.dev"; 
 
 const user = tg?.initDataUnsafe?.user || { id:"test_user", first_name:"Test" };
 document.getElementById("userName").innerText = user.first_name;
 document.getElementById("userId").innerText = "ID: " + user.id;
 
-// API helper
 async function api(path, body){
-  const r = await fetch(API_URL + path,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify(body)
-  });
-  return r.json();
+  const btns = document.querySelectorAll('button');
+  btns.forEach(b => b.style.opacity = '0.5');
+  
+  try {
+      const r = await fetch(API_URL + path,{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify(body)
+      });
+      return await r.json();
+  } catch(e) {
+      alert("Internetda xatolik: " + e.message);
+      return {};
+  } finally {
+      btns.forEach(b => b.style.opacity = '1');
+  }
 }
 
-// Tabs
 function openTab(n){
   ["add","stats","send","family"].forEach(t=>{
     document.getElementById("tab-"+t).classList.toggle("hidden",t!==n);
@@ -195,15 +357,18 @@ function openTab(n){
   });
   if(n==="stats") loadStats();
   if(n==="family") refreshFamily();
+  
+  window.scrollTo({top: 0, behavior: 'smooth'});
 }
 
-// ADD EXPENSE
 async function addExpense(){
   const amt=document.getElementById("amount").value.trim();
-  const cat=document.getElementById("cat").value.trim()||"noma'lum";
-  if(!amt) return alert("Summa kiriting");
+  const cat=document.getElementById("cat").value.trim()||"Boshqa";
+  if(!amt) return alert("Iltimos, summani yozing!");
 
   await api("/api/add",{userId:String(user.id),userName:user.first_name,amount:amt,cat});
+  
+  if(tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
   tg?.showAlert?.("✔️ Saqlandi");
 
   document.getElementById("amount").value="";
@@ -211,7 +376,6 @@ async function addExpense(){
   loadStats();
 }
 
-// LOAD STATS + CALENDAR
 async function loadStats(){
   const data=await api("/api/stats",{userId:String(user.id)});
   const now=new Date();
@@ -220,6 +384,11 @@ async function loadStats(){
   const history=document.getElementById("history");
   const calendar=document.getElementById("calendar");
   history.innerHTML=""; calendar.innerHTML="";
+
+  if(!data || !data.length) {
+      history.innerHTML = "<div class='muted' style='text-align:center; padding:20px;'>Hozircha xarajat yo'q</div>";
+      return;
+  }
 
   data.sort((a,b)=>b.id-a.id);
 
@@ -236,23 +405,39 @@ async function loadStats(){
     if(!byDate[key]) byDate[key]=[];
     byDate[key].push(x);
 
-    const item=document.createElement("div");
-    item.className="list-item";
-    item.innerHTML=`<div><div style="font-weight:700">${x.cat}</div><div class="muted small">${d.toLocaleString()}</div></div><div style="font-weight:800">${amount.toLocaleString()}</div>`;
-    history.appendChild(item);
+    if(history.children.length < 5) {
+        const item=document.createElement("div");
+        item.className="list-item";
+        item.innerHTML=`
+            <div>
+                <div class="big-text">${x.cat}</div>
+                <div class="muted small">${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}</div>
+            </div>
+            <div class="big-text" style="color:var(--text-main)">${amount.toLocaleString()}</div>`;
+        history.appendChild(item);
+    }
   }
 
-  // calendar
   for(const day in byDate){
     const block=document.createElement("div");
     block.className="card";
+    block.style.marginBottom = "10px";
+    block.style.padding = "10px";
+    
     const d=new Date(day);
     let sum=0;
     byDate[day].forEach(x=>sum+=Number(x.amount)||0);
 
-    let html=`<div style="font-weight:800;margin-bottom:6px">${d.toLocaleDateString()} — ${sum.toLocaleString()} so'm</div>`;
+    let html=`<div style="font-weight:700; font-size:17px; margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:5px; display:flex; justify-content:space-between;">
+        <span>${d.toLocaleDateString()}</span>
+        <span style="color:var(--accent)">${sum.toLocaleString()} so'm</span>
+    </div>`;
+    
     for(const x of byDate[day]){
-      html+=`<div class="list-item"><div>${x.cat}</div><div style="font-weight:700">${Number(x.amount).toLocaleString()}</div></div>`;
+      html+=`<div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:16px;">
+        <span>${x.cat}</span>
+        <span style="font-weight:600">${Number(x.amount).toLocaleString()}</span>
+      </div>`;
     }
     block.innerHTML=html;
     calendar.appendChild(block);
@@ -262,33 +447,45 @@ async function loadStats(){
   document.getElementById("stMonth").innerText=month.toLocaleString();
 }
 
-// SEND MESSAGE
 async function sendMessage(){
   const text=document.getElementById("msg").value.trim();
-  if(!text) return alert("Matn yozing");
+  if(!text) return alert("Xabar yozing");
   await api("/api/send",{userId:String(user.id),userName:user.first_name,text});
+  alert("Xabar yuborildi!");
   document.getElementById("msg").value="";
 }
 
-// FAMILY
 async function connectFamily(){
   const id=document.getElementById("connectId").value.trim();
+  if(!id) return alert("ID raqamini yozing");
   await api("/api/connect",{userId:String(user.id),userName:user.first_name,targetId:id});
+  alert("So'rov yuborildi");
 }
 
 function shareInvite(){
-  const text=`Ulanish uchun botga /connect ${user.id} deb yuboring`;
+  const text=`Family Hub ilovasiga ulaning. Mening ID raqamim: ${user.id}`;
   window.open("https://t.me/share/url?text="+encodeURIComponent(text));
 }
 
 async function refreshFamily(){
   const f=await api("/api/family",{userId:String(user.id)});
   const box=document.getElementById("familyInfo");
-  box.innerHTML=`<div class="list-item"><b>Boshliq:</b> ${f.leader}</div>`;
+  
+  if(!f || !f.leader) {
+      box.innerHTML = "<div class='muted'>Siz yolg'izsiz</div>";
+      return;
+  }
+
+  box.innerHTML=`<div class="list-item" style="border-left: 4px solid var(--accent)">
+    <div class="muted">Oila boshlig'i:</div>
+    <div class="big-text">${f.leader}</div>
+  </div>`;
+  
   f.members?.forEach(m=>{
     const d=document.createElement("div");
     d.className="list-item";
-    d.innerText="👤 "+m;
+    // Ikonkaga o'zgartirildi
+    d.innerHTML=`<span class="big-text"><i class="ph-bold ph-user"></i> ${m}</span>`;
     box.appendChild(d);
   });
 }
