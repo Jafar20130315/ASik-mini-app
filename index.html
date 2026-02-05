@@ -28,10 +28,9 @@
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     margin: 0;
-    padding-bottom: 90px; /* Navigatsiya uchun joy */
+    padding-bottom: 90px;
   }
 
-  /* Zamonaviy Input */
   .modern-input {
     background: var(--card-bg);
     border: 1px solid transparent;
@@ -48,7 +47,6 @@
     border-color: var(--primary);
   }
 
-  /* Kartalar */
   .glass-card {
     background: var(--card-bg);
     border-radius: var(--radius);
@@ -58,7 +56,6 @@
     overflow: hidden;
   }
 
-  /* Tugmalar */
   .btn-action {
     background: var(--primary);
     color: white;
@@ -78,7 +75,6 @@
   .btn-danger { background: var(--danger); }
   .btn-ghost { background: var(--card-bg-active); color: var(--primary); }
 
-  /* Navigatsiya */
   .nav-bar {
     position: fixed;
     bottom: 20px;
@@ -114,7 +110,6 @@
   .nav-item i { font-size: 24px; margin-bottom: 2px; }
   .nav-item.active { color: var(--primary); background: rgba(10, 132, 255, 0.1); }
 
-  /* Profil Avatari */
   .profile-avatar {
     width: 40px;
     height: 40px;
@@ -128,8 +123,7 @@
     cursor: pointer;
   }
   .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
-  
-  /* Ro'yxat */
+
   .list-row {
     display: flex;
     justify-content: space-between;
@@ -140,8 +134,7 @@
   .list-row:last-child { border-bottom: none; }
 
   .hidden { display: none !important; }
-  
-  /* Sarlavhalar */
+
   h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin: 0; }
   h2 { font-size: 20px; font-weight: 700; margin-bottom: 15px; }
   .subtitle { font-size: 13px; color: var(--text-secondary); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;}
@@ -150,7 +143,7 @@
 <body>
 
 <div class="p-5 max-w-md mx-auto">
-  
+
   <!-- HEADER -->
   <header class="flex justify-between items-center mb-6">
     <div>
@@ -197,14 +190,13 @@
       </div>
       <div id="history" class="flex flex-col gap-1"></div>
     </div>
-    
+
     <h2 class="mt-6 px-1">Tarix</h2>
     <div id="calendar" class="flex flex-col gap-3"></div>
   </section>
 
   <!-- FAMILY SETTINGS -->
   <section id="tab-family" class="hidden">
-    <!-- Oila Nomi -->
     <div class="glass-card text-center">
       <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-blue-500 to-purple-600 mx-auto flex items-center justify-center mb-3 text-3xl text-white">
         <i class="ph-bold ph-house"></i>
@@ -213,31 +205,27 @@
       <div class="text-gray-400 text-sm mt-1" id="familyIdDisplay">ID: ...</div>
     </div>
 
-    <!-- Ishtirokchilar -->
     <div class="mb-2 px-1 flex justify-between items-end">
       <span class="subtitle mb-0">Ishtirokchilar</span>
     </div>
-    
+
     <div class="glass-card p-0 overflow-hidden">
-      <div id="familyList" class="divide-y divide-gray-800">
-        <!-- JS orqali to'ldiriladi -->
-      </div>
+      <div id="familyList" class="divide-y divide-gray-800"></div>
     </div>
 
-    <!-- Actions -->
     <div class="glass-card">
       <span class="subtitle">Boshqaruv</span>
       <div class="flex flex-col gap-3">
         <div id="connectBlock">
-           <p class="text-sm text-gray-400 mb-2">Boshqa oilaga qo'shilish uchun ID kiriting:</p>
-           <div class="flex gap-2">
-             <input id="connectId" type="number" class="modern-input py-2" placeholder="Oila ID">
-             <button class="btn-action w-auto px-4" onclick="connectFamily()">
-               <i class="ph-bold ph-arrow-right"></i>
-             </button>
-           </div>
+          <p class="text-sm text-gray-400 mb-2">Boshqa oilaga qo'shilish uchun ID kiriting:</p>
+          <div class="flex gap-2">
+            <input id="connectId" type="number" class="modern-input py-2" placeholder="Oila ID">
+            <button class="btn-action w-auto px-4" onclick="connectFamily()">
+              <i class="ph-bold ph-arrow-right"></i>
+            </button>
+          </div>
         </div>
-        
+
         <button class="btn-action btn-ghost w-full justify-center mt-2" onclick="shareInvite()">
           <i class="ph-bold ph-share-network"></i> Taklif havolasi
         </button>
@@ -294,29 +282,21 @@ if (tg) {
 // Worker URL
 const API_URL = "https://asik.windowsnoutbook.workers.dev";
 
-// Telegram user (Mini App) или mock для браузера
+// Telegram user or mock
 const user = tg?.initDataUnsafe?.user || { id: "test_999", first_name: "Test", photo_url: "" };
 
 // Avatar
 const avatarEl = document.getElementById("userAvatar");
-if (user.photo_url) {
-  avatarEl.src = user.photo_url;
-} else {
+if (user.photo_url) avatarEl.src = user.photo_url;
+else {
   avatarEl.style.display = "none";
   avatarEl.parentElement.innerHTML = '<i class="ph-bold ph-user text-white text-xl"></i>';
 }
 
 let currentFamilyData = null;
-
-// Маленький helper
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
-/** ---------------- STABLE API WRAPPER ----------------
- * - timeout
- * - retries on network errors
- * - safe json parsing
- * - unified error handling
- */
+/** ---------------- STABLE API ---------------- */
 async function api(path, body, { timeoutMs = 12000, retries = 1 } = {}) {
   const btns = document.querySelectorAll("button");
   btns.forEach(b => b.style.opacity = "0.7");
@@ -338,22 +318,16 @@ async function api(path, body, { timeoutMs = 12000, retries = 1 } = {}) {
 
         const text = await r.text();
         let data = null;
-        try { data = text ? JSON.parse(text) : null; } catch { data = { error: "Non-JSON response", raw: text }; }
+        try { data = text ? JSON.parse(text) : null; } catch { data = { ok:false, error:"non_json", raw:text }; }
 
-        // Worker часто возвращает {ok:false,error:"..."} даже с 200
         if (!r.ok) {
           const msg = (data && (data.error || data.message)) ? (data.error || data.message) : `HTTP ${r.status}`;
           throw new Error(msg);
         }
-
         return data;
       } catch (e) {
         lastErr = e;
-        // retry только на network/abort
-        if (attempt < retries) {
-          await sleep(350 * (attempt + 1));
-          continue;
-        }
+        if (attempt < retries) { await sleep(350 * (attempt + 1)); continue; }
         throw lastErr;
       }
     }
@@ -368,86 +342,90 @@ async function api(path, body, { timeoutMs = 12000, retries = 1 } = {}) {
 }
 
 /** ---------------- NAVIGATION ---------------- */
-function openTab(n) {
-  ["add", "stats", "send", "family"].forEach(t => {
-    document.getElementById("tab-" + t).classList.toggle("hidden", t !== n);
-    document.getElementById("nav-" + t)?.classList?.toggle("active", t === n);
+function openTab(n){
+  ["add","stats","send","family"].forEach(t=>{
+    document.getElementById("tab-"+t).classList.toggle("hidden",t!==n);
+    document.getElementById("nav-"+t)?.classList?.toggle("active",t===n);
   });
 
   const titles = { add: "Xarajatlar", stats: "Hisobot", send: "Xat yozish", family: "Oila Sozlamalari" };
   document.querySelector("h1").innerText = titles[n] || "Family Hub";
 
-  if (n === "stats") loadStats();
-  if (n === "family") refreshFamily();
-  if (n === "add") loadQuickStats();
+  if(n==="stats") loadStats();
+  if(n==="family") refreshFamily();
+  if(n==="add") loadQuickStats();
 
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  window.scrollTo({top: 0, behavior: "smooth"});
 }
 
-/** ---------------- ADD EXPENSE ---------------- */
-async function addExpense() {
-  const amt = document.getElementById("amount").value.trim();
-  const cat = document.getElementById("cat").value.trim() || "Boshqa";
-  if (!amt) return tg?.showAlert?.("Summani kiriting!");
+/** ---------------- ADD ---------------- */
+async function addExpense(){
+  const amt=document.getElementById("amount").value.trim();
+  const cat=document.getElementById("cat").value.trim()||"Boshqa";
+  if(!amt) return tg?.showAlert?.("Summani kiriting!");
 
-  const res = await api("/api/add", {
-    userId: String(user.id),
-    userName: user.first_name,
-    amount: amt,
+  const res = await api("/api/add",{
+    userId:String(user.id),
+    userName:user.first_name,
+    userPhoto: user.photo_url || "",
+    amount:amt,
     cat
   });
 
-  if (!res || res.ok !== true) return;
+  if(!res?.ok) return;
 
   tg?.HapticFeedback?.notificationOccurred?.("success");
   tg?.showAlert?.("✅ Saqlandi");
 
-  document.getElementById("amount").value = "";
-  document.getElementById("cat").value = "";
+  document.getElementById("amount").value="";
+  document.getElementById("cat").value="";
   loadQuickStats();
 }
 
 async function loadQuickStats() {
-  const data = await api("/api/stats", { userId: String(user.id) });
+  const data = await api("/api/stats",{
+    userId:String(user.id),
+    userName:user.first_name,
+    userPhoto: user.photo_url || ""
+  });
+
   const now = new Date();
   let today = 0;
-
-  if (Array.isArray(data)) {
+  if(Array.isArray(data)) {
     for (const x of data) {
       const ts = Number(x.createdAt || x.id);
       if (!ts) continue;
       const d = new Date(ts);
-      if (d.toDateString() === now.toDateString()) today += (Number(x.amount) || 0);
+      if(d.toDateString() === now.toDateString()) today += (Number(x.amount)||0);
     }
   }
-
   document.getElementById("quickStatsToday").innerText = today.toLocaleString() + " so'm";
 }
 
 /** ---------------- STATS ---------------- */
-async function loadStats() {
-  const data = await api("/api/stats", { userId: String(user.id) });
+async function loadStats(){
+  const data = await api("/api/stats",{
+    userId:String(user.id),
+    userName:user.first_name,
+    userPhoto: user.photo_url || ""
+  });
 
   const now = new Date();
   let month = 0;
 
   const history = document.getElementById("history");
   const calendar = document.getElementById("calendar");
-  history.innerHTML = "";
-  calendar.innerHTML = "";
+  history.innerHTML = ""; calendar.innerHTML = "";
 
-  if (!Array.isArray(data) || !data.length) {
+  if(!Array.isArray(data) || !data.length) {
     history.innerHTML = "<div class='text-center text-gray-500 py-4'>Hozircha xarajat yo'q</div>";
     document.getElementById("stMonth").innerText = "0 so'm";
     return;
   }
 
-  // id — number
-  data.sort((a, b) => Number(b.id) - Number(a.id));
+  data.sort((a,b)=>Number(b.id)-Number(a.id));
+  const byDate={};
 
-  const byDate = {};
-
-  // last 5
   data.slice(0, 5).forEach(x => {
     const d = new Date(Number(x.createdAt || x.id));
     const div = document.createElement("div");
@@ -462,60 +440,58 @@ async function loadStats() {
           <div class="text-xs text-gray-500">${escapeHtml(x.name || "User")} • ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}</div>
         </div>
       </div>
-      <div class="font-bold text-white">${Number(x.amount || 0).toLocaleString()}</div>
+      <div class="font-bold text-white">${Number(x.amount||0).toLocaleString()}</div>
     `;
     history.appendChild(div);
   });
 
-  // group by day
-  for (const x of data) {
-    const d = new Date(Number(x.createdAt || x.id));
-    const key = d.toISOString().split("T")[0];
-    const amount = Number(x.amount) || 0;
+  for(const x of data){
+    const d=new Date(Number(x.createdAt||x.id));
+    const key=d.toISOString().split("T")[0];
+    const amount=Number(x.amount)||0;
 
-    if (d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) month += amount;
-    if (!byDate[key]) byDate[key] = [];
+    if(d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear()) month+=amount;
+
+    if(!byDate[key]) byDate[key]=[];
     byDate[key].push(x);
   }
 
-  // render by date desc
-  const days = Object.keys(byDate).sort((a, b) => (a < b ? 1 : -1));
-  for (const day of days) {
-    const block = document.createElement("div");
-    block.className = "glass-card !p-4";
+  const days = Object.keys(byDate).sort((a,b)=>a<b?1:-1);
+  for(const day of days){
+    const block=document.createElement("div");
+    block.className="glass-card !p-4";
 
-    const d = new Date(day + "T00:00:00");
-    let sum = 0;
-    byDate[day].forEach(x => sum += Number(x.amount) || 0);
+    const d=new Date(day+"T00:00:00");
+    let sum=0;
+    byDate[day].forEach(x=>sum+=Number(x.amount)||0);
 
-    let html = `
-      <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-700">
-        <span class="font-bold text-gray-300">${d.toLocaleDateString()}</span>
-        <span class="text-blue-400 font-bold">${sum.toLocaleString()}</span>
-      </div>
-    `;
+    let html=`<div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-700">
+      <span class="font-bold text-gray-300">${d.toLocaleDateString()}</span>
+      <span class="text-blue-400 font-bold">${sum.toLocaleString()}</span>
+    </div>`;
 
-    for (const x of byDate[day]) {
-      html += `
-        <div class="flex justify-between text-sm mb-2 last:mb-0">
-          <span class="text-gray-400">${escapeHtml(x.cat || "noma'lum")}
-            <span class="text-xs opacity-50">(${escapeHtml(x.name || "")})</span>
-          </span>
-          <span>${Number(x.amount || 0).toLocaleString()}</span>
-        </div>
-      `;
+    for(const x of byDate[day]){
+      html+=`<div class="flex justify-between text-sm mb-2 last:mb-0">
+        <span class="text-gray-400">${escapeHtml(x.cat || "noma'lum")}
+          <span class="text-xs opacity-50">(${escapeHtml(x.name || "")})</span>
+        </span>
+        <span>${Number(x.amount||0).toLocaleString()}</span>
+      </div>`;
     }
-
-    block.innerHTML = html;
+    block.innerHTML=html;
     calendar.appendChild(block);
   }
 
   document.getElementById("stMonth").innerText = month.toLocaleString() + " so'm";
 }
 
-/** ---------------- FAMILY ---------------- */
-async function refreshFamily() {
-  const f = await api("/api/family", { userId: String(user.id) });
+/** ---------------- FAMILY (name + photo) ---------------- */
+async function refreshFamily(){
+  const f = await api("/api/family",{
+    userId:String(user.id),
+    userName:user.first_name,
+    userPhoto: user.photo_url || ""
+  });
   if (!f) return;
 
   currentFamilyData = f;
@@ -523,36 +499,43 @@ async function refreshFamily() {
   const listEl = document.getElementById("familyList");
   listEl.innerHTML = "";
 
-  const isLeader = String(f.leader) === String(user.id);
+  const leader = f.leader || { id:"", name:"Leader", photo:"" };
+  const members = Array.isArray(f.members) ? f.members : [];
+
+  const isLeader = (String(leader.id) === String(user.id));
 
   document.getElementById("familyName").innerText = isLeader ? "Mening Oilam" : "Oila";
-  document.getElementById("familyIdDisplay").innerText = "Oila ID: " + f.leader;
+  document.getElementById("familyIdDisplay").innerText = "Oila ID: " + leader.id;
 
-  // ВАЖНО: в воркере лидер может исключать людей только через callback "/unc" (или через новый endpoint, если добавишь)
-  // Поэтому кнопку "Oiladan chiqish" показываем НЕ лидеру, но действие делаем безопасно
   document.getElementById("leaveBtn").classList.toggle("hidden", isLeader);
 
-  // Leader row
+  const avatarHtml = (photo) => {
+    if (photo) return `<img src="${photo}" class="w-10 h-10 rounded-full object-cover" />`;
+    return `<div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-gray-300">
+              <i class="ph-bold ph-user"></i>
+            </div>`;
+  };
+
+  // leader row
   const leaderRow = document.createElement("div");
   leaderRow.className = "flex items-center justify-between p-4 bg-blue-900/20";
   leaderRow.innerHTML = `
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-full bg-yellow-500/20 text-yellow-500 flex items-center justify-center border border-yellow-500/50">
-        <i class="ph-fill ph-crown"></i>
+      <div class="relative">
+        ${avatarHtml(leader.photo)}
+        <div class="absolute -right-1 -bottom-1 w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center">
+          <i class="ph-fill ph-crown text-black text-xs"></i>
+        </div>
       </div>
       <div>
-        <div class="font-bold text-white">Boshliq (ID: ${escapeHtml(String(f.leader))})</div>
+        <div class="font-bold text-white">${escapeHtml(leader.name)} <span class="text-xs text-gray-400">(ID: ${escapeHtml(leader.id)})</span></div>
         <div class="text-xs text-gray-400">Admin</div>
       </div>
     </div>
   `;
   listEl.appendChild(leaderRow);
 
-  // Members
-  const members = Array.isArray(f.members) ? f.members : [];
-  const filtered = members.filter(mid => String(mid) !== String(f.leader));
-
-  if (!filtered.length) {
+  if (!members.length) {
     const empty = document.createElement("div");
     empty.className = "p-4 text-center text-gray-500 text-sm";
     empty.innerText = "Boshqa ishtirokchilar yo'q";
@@ -560,102 +543,102 @@ async function refreshFamily() {
     return;
   }
 
-  filtered.forEach(memberId => {
+  for (const m of members) {
     const row = document.createElement("div");
     row.className = "flex items-center justify-between p-4";
 
-    // Воркере НЕТ /api/kick. Поэтому:
-    // - либо убираем кнопку кика,
-    // - либо делаем "kick" через новый endpoint (см. патч ниже).
-    // Я оставлю кнопку, но она будет работать ТОЛЬКО если ты добавишь /api/kick в воркер.
-    const actionBtn = isLeader
-      ? `<button onclick="kickMember('${String(memberId)}')" class="w-8 h-8 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center">
-            <i class="ph-bold ph-trash"></i>
-         </button>`
-      : "";
+    const actionBtn = isLeader ? `
+      <button onclick="kickMember('${String(m.id)}')" class="w-8 h-8 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center">
+        <i class="ph-bold ph-trash"></i>
+      </button>` : "";
 
     row.innerHTML = `
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-gray-300">
-          <i class="ph-bold ph-user"></i>
-        </div>
+        ${avatarHtml(m.photo)}
         <div>
-          <div class="font-medium text-white">Foydalanuvchi</div>
-          <div class="text-xs text-gray-500">ID: ${escapeHtml(String(memberId))}</div>
+          <div class="font-medium text-white">${escapeHtml(m.name || "User")}</div>
+          <div class="text-xs text-gray-500">ID: ${escapeHtml(String(m.id))}</div>
         </div>
       </div>
       ${actionBtn}
     `;
     listEl.appendChild(row);
-  });
+  }
 }
 
-async function connectFamily() {
-  const id = document.getElementById("connectId").value.trim();
-  if (!id) return tg?.showAlert?.("ID raqamini yozing");
-  if (id === String(user.id)) return tg?.showAlert?.("O'z IDingizni yozmang");
+async function connectFamily(){
+  const id=document.getElementById("connectId").value.trim();
+  if(!id) return tg?.showAlert?.("ID raqamini yozing");
+  if(id === String(user.id)) return tg?.showAlert?.("O'z IDingizni yozmang");
 
-  const res = await api("/api/connect", {
+  const res = await api("/api/connect",{
+    userId:String(user.id),
+    userName:user.first_name,
+    userPhoto: user.photo_url || "",
+    targetId:id
+  });
+  if(res?.ok) tg?.showAlert?.("So'rov yuborildi ✅");
+}
+
+async function kickMember(targetId) {
+  if(!confirm("Bu foydalanuvchini oiladan o'chirmoqchimisiz?")) return;
+
+  const res = await api("/api/kick", {
     userId: String(user.id),
     userName: user.first_name,
-    targetId: id
+    userPhoto: user.photo_url || "",
+    targetId: String(targetId)
   });
 
-  if (res?.ok) tg?.showAlert?.("So'rov yuborildi ✅");
-}
-
-// Работает ТОЛЬКО если ты добавишь /api/kick в воркер (патч ниже)
-async function kickMember(targetId) {
-  if (!confirm("Bu foydalanuvchini oiladan o'chirmoqchimisiz?")) return;
-
-  const res = await api("/api/kick", { userId: String(user.id), targetId: String(targetId) });
-  if (res?.ok) {
+  if(res?.ok) {
     tg?.showAlert?.("Foydalanuvchi o'chirildi");
     refreshFamily();
   } else {
-    tg?.showAlert?.("Xatolik: " + (res?.error || "Ruxsat yo'q yoki endpoint yo'q"));
+    tg?.showAlert?.("Xatolik: " + (res?.error || "Ruxsat yo'q"));
   }
 }
 
-// Выйти из семьи: безопасный способ через бот
-function confirmLeave() {
-  if (!confirm("Rostan ham oiladan chiqmoqchimisiz?")) return;
+async function confirmLeave(){
+  if(!confirm("Rostan ham oiladan chiqmoqchimisiz?")) return;
 
-  // Правильный flow в твоём воркере — через /unc с подтверждением кнопкой (callback).
-  // Поэтому просто откроем бота и подскажем команду.
-  if (tg?.openTelegramLink) {
-    tg.openTelegramLink("https://t.me/" + encodeURIComponent(tg?.initDataUnsafe?.user?.username || ""));
-  }
-
-  tg?.showAlert?.("Botga o'tib /unc yubor. Keyin ✅ tasdiqlaysan.");
-}
-
-/** ---------------- SEND MESSAGE ---------------- */
-async function sendMessage() {
-  const text = document.getElementById("msg").value.trim();
-  if (!text) return tg?.showAlert?.("Xabar yozing");
-
-  const res = await api("/api/send", {
+  const res = await api("/api/leave", {
     userId: String(user.id),
     userName: user.first_name,
+    userPhoto: user.photo_url || ""
+  });
+
+  if(res?.ok) {
+    tg?.showAlert?.("Siz oiladan chiqdingiz");
+    location.reload();
+  }
+}
+
+/** ---------------- SEND ---------------- */
+async function sendMessage(){
+  const text=document.getElementById("msg").value.trim();
+  if(!text) return tg?.showAlert?.("Xabar yozing");
+
+  const res = await api("/api/send",{
+    userId:String(user.id),
+    userName:user.first_name,
+    userPhoto: user.photo_url || "",
     text
   });
 
-  if (res?.ok) {
+  if(res?.ok) {
     tg?.showAlert?.("Xabar yuborildi! ✉️");
-    document.getElementById("msg").value = "";
+    document.getElementById("msg").value="";
   }
 }
 
-function shareInvite() {
-  const text = `Family Hub ilovasiga ulaning. Mening ID raqamim: ${user.id}`;
+function shareInvite(){
+  const text=`Family Hub ilovasiga ulaning. Mening ID raqamim: ${user.id}`;
   const share = "https://t.me/share/url?text=" + encodeURIComponent(text);
-
-  if (tg?.openTelegramLink) tg.openTelegramLink(share);
+  if(tg?.openTelegramLink) tg.openTelegramLink(share);
   else window.open(share, "_blank");
 }
 
-/** ---------------- SAFETY: XSS in UI ---------------- */
+/** ---------------- SAFETY ---------------- */
 function escapeHtml(s) {
   return String(s ?? "")
     .replaceAll("&", "&amp;")
@@ -668,6 +651,5 @@ function escapeHtml(s) {
 // Initial load
 loadQuickStats();
 </script>
-
 </body>
 </html>
