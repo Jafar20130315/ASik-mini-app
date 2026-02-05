@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>Family Hub</title>
+<title>ASik App</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
@@ -147,7 +147,7 @@
   <!-- HEADER -->
   <header class="flex justify-between items-center mb-6">
     <div>
-      <div class="text-sm text-gray-400 font-medium mb-1">Family Hub</div>
+      <div class="text-sm text-gray-400 font-medium mb-1">ASik</div>
       <h1>Xarajatlar</h1>
     </div>
     <div class="profile-avatar" onclick="openTab('family')">
@@ -632,7 +632,7 @@ async function sendMessage(){
 }
 
 function shareInvite(){
-  const text=`Family Hub ilovasiga ulaning. Mening ID raqamim: ${user.id}`;
+  const text=`ASik ilovasiga ulaning. Mening ID raqamim: ${user.id}`;
   const share = "https://t.me/share/url?text=" + encodeURIComponent(text);
   if(tg?.openTelegramLink) tg.openTelegramLink(share);
   else window.open(share, "_blank");
