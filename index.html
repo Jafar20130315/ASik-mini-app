@@ -283,309 +283,391 @@
 </nav>
 
 <script>
-// --- CONFIG & INIT ---
+/** ---------------- CONFIG / INIT ---------------- */
 const tg = window.Telegram?.WebApp;
 tg?.expand?.();
 if (tg) {
-    tg.setHeaderColor('#000000');
-    tg.setBackgroundColor('#000000');
+  tg.setHeaderColor('#000000');
+  tg.setBackgroundColor('#000000');
 }
 
-// API URL (O'zgartirish shart emas, agar Worker bir xil domenda bo'lsa)
-const API_URL = "https://asik.windowsnoutbook.workers.dev"; 
+// Worker URL
+const API_URL = "https://asik.windowsnoutbook.workers.dev";
 
-// Mock user for testing in browser
+// Telegram user (Mini App) или mock для браузера
 const user = tg?.initDataUnsafe?.user || { id: "test_999", first_name: "Test", photo_url: "" };
 
-// Set Profile Photo
+// Avatar
 const avatarEl = document.getElementById("userAvatar");
-if(user.photo_url) {
-    avatarEl.src = user.photo_url;
+if (user.photo_url) {
+  avatarEl.src = user.photo_url;
 } else {
-    avatarEl.style.display = 'none';
-    avatarEl.parentElement.innerHTML = '<i class="ph-bold ph-user text-white text-xl"></i>';
+  avatarEl.style.display = "none";
+  avatarEl.parentElement.innerHTML = '<i class="ph-bold ph-user text-white text-xl"></i>';
 }
 
-// Global variable to store current family state
 let currentFamilyData = null;
 
-// --- API FUNCTION ---
-async function api(path, body){
-  const btns = document.querySelectorAll('button');
-  btns.forEach(b => b.style.opacity = '0.7');
-  
+// Маленький helper
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+/** ---------------- STABLE API WRAPPER ----------------
+ * - timeout
+ * - retries on network errors
+ * - safe json parsing
+ * - unified error handling
+ */
+async function api(path, body, { timeoutMs = 12000, retries = 1 } = {}) {
+  const btns = document.querySelectorAll("button");
+  btns.forEach(b => b.style.opacity = "0.7");
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
   try {
-      const r = await fetch(API_URL + path,{
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify(body)
-      });
-      return await r.json();
-  } catch(e) {
-      tg?.showAlert?.("Xatolik: " + e.message);
-      return {};
+    let lastErr = null;
+
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        const r = await fetch(API_URL + path, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body || {}),
+          signal: controller.signal
+        });
+
+        const text = await r.text();
+        let data = null;
+        try { data = text ? JSON.parse(text) : null; } catch { data = { error: "Non-JSON response", raw: text }; }
+
+        // Worker часто возвращает {ok:false,error:"..."} даже с 200
+        if (!r.ok) {
+          const msg = (data && (data.error || data.message)) ? (data.error || data.message) : `HTTP ${r.status}`;
+          throw new Error(msg);
+        }
+
+        return data;
+      } catch (e) {
+        lastErr = e;
+        // retry только на network/abort
+        if (attempt < retries) {
+          await sleep(350 * (attempt + 1));
+          continue;
+        }
+        throw lastErr;
+      }
+    }
+  } catch (e) {
+    const msg = e?.name === "AbortError" ? "Timeout. Worker javob bermadi." : (e.message || "Unknown error");
+    tg?.showAlert?.("Xatolik: " + msg);
+    return null;
   } finally {
-      btns.forEach(b => b.style.opacity = '1');
+    clearTimeout(timer);
+    btns.forEach(b => b.style.opacity = "1");
   }
 }
 
-// --- NAVIGATION ---
-function openTab(n){
-  ["add","stats","send","family"].forEach(t=>{
-    document.getElementById("tab-"+t).classList.toggle("hidden",t!==n);
-    document.getElementById("nav-"+t)?.classList?.toggle("active",t===n);
+/** ---------------- NAVIGATION ---------------- */
+function openTab(n) {
+  ["add", "stats", "send", "family"].forEach(t => {
+    document.getElementById("tab-" + t).classList.toggle("hidden", t !== n);
+    document.getElementById("nav-" + t)?.classList?.toggle("active", t === n);
   });
-  
-  // Header title change
-  const titles = { add: "Xarajatlar", stats: "Hisobot", send: "Xat yozish", family: "Oila Sozlamalari" };
-  document.querySelector("h1").innerText = titles[n];
 
-  if(n==="stats") loadStats();
-  if(n==="family") refreshFamily();
-  if(n==="add") loadQuickStats();
-  
-  window.scrollTo({top: 0, behavior: 'smooth'});
+  const titles = { add: "Xarajatlar", stats: "Hisobot", send: "Xat yozish", family: "Oila Sozlamalari" };
+  document.querySelector("h1").innerText = titles[n] || "Family Hub";
+
+  if (n === "stats") loadStats();
+  if (n === "family") refreshFamily();
+  if (n === "add") loadQuickStats();
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-// --- LOGIC: ADD ---
-async function addExpense(){
-  const amt=document.getElementById("amount").value.trim();
-  const cat=document.getElementById("cat").value.trim()||"Boshqa";
-  if(!amt) return tg?.showAlert?.("Summani kiriting!");
+/** ---------------- ADD EXPENSE ---------------- */
+async function addExpense() {
+  const amt = document.getElementById("amount").value.trim();
+  const cat = document.getElementById("cat").value.trim() || "Boshqa";
+  if (!amt) return tg?.showAlert?.("Summani kiriting!");
 
-  await api("/api/add",{userId:String(user.id),userName:user.first_name,amount:amt,cat});
-  
-  if(tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+  const res = await api("/api/add", {
+    userId: String(user.id),
+    userName: user.first_name,
+    amount: amt,
+    cat
+  });
+
+  if (!res || res.ok !== true) return;
+
+  tg?.HapticFeedback?.notificationOccurred?.("success");
   tg?.showAlert?.("✅ Saqlandi");
 
-  document.getElementById("amount").value="";
-  document.getElementById("cat").value="";
+  document.getElementById("amount").value = "";
+  document.getElementById("cat").value = "";
   loadQuickStats();
 }
 
 async function loadQuickStats() {
-    // Kichik statistika (bugun uchun)
-    const data = await api("/api/stats",{userId:String(user.id)});
-    const now = new Date();
-    let today = 0;
-    if(data && data.length) {
-        data.forEach(x => {
-            const d = new Date(x.createdAt || x.id);
-            if(d.toDateString() === now.toDateString()) today += (Number(x.amount)||0);
-        });
+  const data = await api("/api/stats", { userId: String(user.id) });
+  const now = new Date();
+  let today = 0;
+
+  if (Array.isArray(data)) {
+    for (const x of data) {
+      const ts = Number(x.createdAt || x.id);
+      if (!ts) continue;
+      const d = new Date(ts);
+      if (d.toDateString() === now.toDateString()) today += (Number(x.amount) || 0);
     }
-    document.getElementById("quickStatsToday").innerText = today.toLocaleString() + " so'm";
+  }
+
+  document.getElementById("quickStatsToday").innerText = today.toLocaleString() + " so'm";
 }
 
-// --- LOGIC: STATS ---
-async function loadStats(){
-  const data = await api("/api/stats",{userId:String(user.id)});
+/** ---------------- STATS ---------------- */
+async function loadStats() {
+  const data = await api("/api/stats", { userId: String(user.id) });
+
   const now = new Date();
   let month = 0;
 
   const history = document.getElementById("history");
   const calendar = document.getElementById("calendar");
-  history.innerHTML = ""; calendar.innerHTML = "";
+  history.innerHTML = "";
+  calendar.innerHTML = "";
 
-  if(!data || !data.length) {
-      history.innerHTML = "<div class='text-center text-gray-500 py-4'>Hozircha xarajat yo'q</div>";
-      return;
+  if (!Array.isArray(data) || !data.length) {
+    history.innerHTML = "<div class='text-center text-gray-500 py-4'>Hozircha xarajat yo'q</div>";
+    document.getElementById("stMonth").innerText = "0 so'm";
+    return;
   }
 
-  data.sort((a,b)=>b.id-a.id);
-  const byDate={};
+  // id — number
+  data.sort((a, b) => Number(b.id) - Number(a.id));
 
-  // Oxirgi 5 ta
+  const byDate = {};
+
+  // last 5
   data.slice(0, 5).forEach(x => {
-     const d = new Date(x.createdAt || x.id);
-     const div = document.createElement("div");
-     div.className = "list-row";
-     div.innerHTML = `
-        <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-blue-500">
-                <i class="ph-bold ph-shopping-bag"></i>
-            </div>
-            <div>
-                <div class="font-semibold text-sm">${x.cat}</div>
-                <div class="text-xs text-gray-500">${x.name || 'User'} • ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}</div>
-            </div>
+    const d = new Date(Number(x.createdAt || x.id));
+    const div = document.createElement("div");
+    div.className = "list-row";
+    div.innerHTML = `
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-blue-500">
+          <i class="ph-bold ph-shopping-bag"></i>
         </div>
-        <div class="font-bold text-white">${Number(x.amount).toLocaleString()}</div>
-     `;
-     history.appendChild(div);
+        <div>
+          <div class="font-semibold text-sm">${escapeHtml(x.cat || "noma'lum")}</div>
+          <div class="text-xs text-gray-500">${escapeHtml(x.name || "User")} • ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}</div>
+        </div>
+      </div>
+      <div class="font-bold text-white">${Number(x.amount || 0).toLocaleString()}</div>
+    `;
+    history.appendChild(div);
   });
 
-  // Guruhlash
-  for(const x of data){
-    const d=new Date(x.createdAt||x.id);
-    const key=d.toISOString().split("T")[0];
-    const amount=Number(x.amount)||0;
+  // group by day
+  for (const x of data) {
+    const d = new Date(Number(x.createdAt || x.id));
+    const key = d.toISOString().split("T")[0];
+    const amount = Number(x.amount) || 0;
 
-    if(d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear()) month+=amount;
-
-    if(!byDate[key]) byDate[key]=[];
+    if (d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) month += amount;
+    if (!byDate[key]) byDate[key] = [];
     byDate[key].push(x);
   }
 
-  for(const day in byDate){
-    const block=document.createElement("div");
-    block.className="glass-card !p-4"; // smaller padding
-    
-    const d=new Date(day);
-    let sum=0;
-    byDate[day].forEach(x=>sum+=Number(x.amount)||0);
+  // render by date desc
+  const days = Object.keys(byDate).sort((a, b) => (a < b ? 1 : -1));
+  for (const day of days) {
+    const block = document.createElement("div");
+    block.className = "glass-card !p-4";
 
-    let html=`<div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-700">
+    const d = new Date(day + "T00:00:00");
+    let sum = 0;
+    byDate[day].forEach(x => sum += Number(x.amount) || 0);
+
+    let html = `
+      <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-700">
         <span class="font-bold text-gray-300">${d.toLocaleDateString()}</span>
         <span class="text-blue-400 font-bold">${sum.toLocaleString()}</span>
-    </div>`;
-    
-    for(const x of byDate[day]){
-      html+=`<div class="flex justify-between text-sm mb-2 last:mb-0">
-        <span class="text-gray-400">${x.cat} <span class="text-xs opacity-50">(${x.name})</span></span>
-        <span>${Number(x.amount).toLocaleString()}</span>
-      </div>`;
+      </div>
+    `;
+
+    for (const x of byDate[day]) {
+      html += `
+        <div class="flex justify-between text-sm mb-2 last:mb-0">
+          <span class="text-gray-400">${escapeHtml(x.cat || "noma'lum")}
+            <span class="text-xs opacity-50">(${escapeHtml(x.name || "")})</span>
+          </span>
+          <span>${Number(x.amount || 0).toLocaleString()}</span>
+        </div>
+      `;
     }
-    block.innerHTML=html;
+
+    block.innerHTML = html;
     calendar.appendChild(block);
   }
 
   document.getElementById("stMonth").innerText = month.toLocaleString() + " so'm";
 }
 
-// --- LOGIC: FAMILY & SETTINGS ---
-async function refreshFamily(){
-  const f = await api("/api/family",{userId:String(user.id)});
-  currentFamilyData = f; // Store for logic
-  
+/** ---------------- FAMILY ---------------- */
+async function refreshFamily() {
+  const f = await api("/api/family", { userId: String(user.id) });
+  if (!f) return;
+
+  currentFamilyData = f;
+
   const listEl = document.getElementById("familyList");
   listEl.innerHTML = "";
-  
-  const isLeader = (String(f.leader) === String(user.id));
-  
-  // Set Family Name (Leader Name's Family)
-  // Backenddan ism kelmasa ID ko'rsatadi
-  document.getElementById("familyName").innerText = isLeader ? "Mening Oilam" : "Oila"; 
-  document.getElementById("familyIdDisplay").innerText = "Oila ID: " + f.leader;
-  
-  // Leave button logic
-  document.getElementById("leaveBtn").classList.toggle("hidden", isLeader); // Leader cannot leave, only delete app data (not implemented here)
 
-  // 1. Leader Row
+  const isLeader = String(f.leader) === String(user.id);
+
+  document.getElementById("familyName").innerText = isLeader ? "Mening Oilam" : "Oila";
+  document.getElementById("familyIdDisplay").innerText = "Oila ID: " + f.leader;
+
+  // ВАЖНО: в воркере лидер может исключать людей только через callback "/unc" (или через новый endpoint, если добавишь)
+  // Поэтому кнопку "Oiladan chiqish" показываем НЕ лидеру, но действие делаем безопасно
+  document.getElementById("leaveBtn").classList.toggle("hidden", isLeader);
+
+  // Leader row
   const leaderRow = document.createElement("div");
   leaderRow.className = "flex items-center justify-between p-4 bg-blue-900/20";
   leaderRow.innerHTML = `
     <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-yellow-500/20 text-yellow-500 flex items-center justify-center border border-yellow-500/50">
-            <i class="ph-fill ph-crown"></i>
-        </div>
-        <div>
-            <div class="font-bold text-white">Boshliq (ID: ${f.leader})</div>
-            <div class="text-xs text-gray-400">Admin</div>
-        </div>
+      <div class="w-10 h-10 rounded-full bg-yellow-500/20 text-yellow-500 flex items-center justify-center border border-yellow-500/50">
+        <i class="ph-fill ph-crown"></i>
+      </div>
+      <div>
+        <div class="font-bold text-white">Boshliq (ID: ${escapeHtml(String(f.leader))})</div>
+        <div class="text-xs text-gray-400">Admin</div>
+      </div>
     </div>
   `;
   listEl.appendChild(leaderRow);
 
-  // 2. Members Rows
-  if(f.members && f.members.length > 0) {
-      f.members.forEach(memberId => {
-          if(String(memberId) === String(f.leader)) return; // Don't show leader twice
+  // Members
+  const members = Array.isArray(f.members) ? f.members : [];
+  const filtered = members.filter(mid => String(mid) !== String(f.leader));
 
-          const row = document.createElement("div");
-          row.className = "flex items-center justify-between p-4";
-          
-          let actionBtn = "";
-          // Agar men leader bo'lsam, o'chirish tugmasini qo'shaman
-          if(isLeader) {
-              actionBtn = `
-                <button onclick="kickMember('${memberId}')" class="w-8 h-8 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center">
-                    <i class="ph-bold ph-trash"></i>
-                </button>
-              `;
-          }
-
-          row.innerHTML = `
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-gray-300">
-                    <i class="ph-bold ph-user"></i>
-                </div>
-                <div>
-                    <div class="font-medium text-white">Foydalanuvchi</div>
-                    <div class="text-xs text-gray-500">ID: ${memberId}</div>
-                </div>
-            </div>
-            ${actionBtn}
-          `;
-          listEl.appendChild(row);
-      });
-  } else {
-      const empty = document.createElement("div");
-      empty.className = "p-4 text-center text-gray-500 text-sm";
-      empty.innerText = "Boshqa ishtirokchilar yo'q";
-      listEl.appendChild(empty);
+  if (!filtered.length) {
+    const empty = document.createElement("div");
+    empty.className = "p-4 text-center text-gray-500 text-sm";
+    empty.innerText = "Boshqa ishtirokchilar yo'q";
+    listEl.appendChild(empty);
+    return;
   }
+
+  filtered.forEach(memberId => {
+    const row = document.createElement("div");
+    row.className = "flex items-center justify-between p-4";
+
+    // Воркере НЕТ /api/kick. Поэтому:
+    // - либо убираем кнопку кика,
+    // - либо делаем "kick" через новый endpoint (см. патч ниже).
+    // Я оставлю кнопку, но она будет работать ТОЛЬКО если ты добавишь /api/kick в воркер.
+    const actionBtn = isLeader
+      ? `<button onclick="kickMember('${String(memberId)}')" class="w-8 h-8 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center">
+            <i class="ph-bold ph-trash"></i>
+         </button>`
+      : "";
+
+    row.innerHTML = `
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-gray-300">
+          <i class="ph-bold ph-user"></i>
+        </div>
+        <div>
+          <div class="font-medium text-white">Foydalanuvchi</div>
+          <div class="text-xs text-gray-500">ID: ${escapeHtml(String(memberId))}</div>
+        </div>
+      </div>
+      ${actionBtn}
+    `;
+    listEl.appendChild(row);
+  });
 }
 
-async function connectFamily(){
-  const id=document.getElementById("connectId").value.trim();
-  if(!id) return tg?.showAlert?.("ID raqamini yozing");
-  if(id === String(user.id)) return tg?.showAlert?.("O'z IDingizni yozmang");
-  
-  await api("/api/connect",{userId:String(user.id),userName:user.first_name,targetId:id});
-  tg?.showAlert?.("So'rov yuborildi ✅");
+async function connectFamily() {
+  const id = document.getElementById("connectId").value.trim();
+  if (!id) return tg?.showAlert?.("ID raqamini yozing");
+  if (id === String(user.id)) return tg?.showAlert?.("O'z IDingizni yozmang");
+
+  const res = await api("/api/connect", {
+    userId: String(user.id),
+    userName: user.first_name,
+    targetId: id
+  });
+
+  if (res?.ok) tg?.showAlert?.("So'rov yuborildi ✅");
 }
 
+// Работает ТОЛЬКО если ты добавишь /api/kick в воркер (патч ниже)
 async function kickMember(targetId) {
-    if(!confirm("Bu foydalanuvchini oiladan o'chirmoqchimisiz?")) return;
-    
-    const res = await api("/api/kick", { userId: String(user.id), targetId: String(targetId) });
-    if(res.ok) {
-        tg?.showAlert?.("Foydalanuvchi o'chirildi");
-        refreshFamily();
-    } else {
-        tg?.showAlert?.("Xatolik: " + (res.error || "Ruxsat yo'q"));
-    }
-}
+  if (!confirm("Bu foydalanuvchini oiladan o'chirmoqchimisiz?")) return;
 
-async function confirmLeave(){
-    if(confirm("Rostan ham oiladan chiqmoqchimisiz?")) {
-        // Hozirgi API da /unc confirm callback orqali ishlaydi, 
-        // lekin biz to'g'ridan-to'g'ri API endpoint orqali ham qilishimiz mumkin
-        // Yoki botga /unc komandasini yuborish kerak bo'ladi.
-        // Keling, API ga oddiy 'leave' so'rovini qo'shamiz (Workerda borligini tekshiramiz)
-        // Workerda hozircha API orqali chiqish yo'q, faqat Callback orqali.
-        // Vaqtinchalik yechim:
-        tg?.close(); 
-        // Yoki workerga yangi endpoint qo'shilgan (pastda).
-        const res = await api("/api/leave", { userId: String(user.id) });
-        if(res.ok) {
-            alert("Siz oiladan chiqdingiz");
-            location.reload();
-        }
-    }
-}
-
-// --- LOGIC: SEND MESSAGE ---
-async function sendMessage(){
-  const text=document.getElementById("msg").value.trim();
-  if(!text) return tg?.showAlert?.("Xabar yozing");
-  await api("/api/send",{userId:String(user.id),userName:user.first_name,text});
-  tg?.showAlert?.("Xabar yuborildi! ✉️");
-  document.getElementById("msg").value="";
-}
-
-function shareInvite(){
-  const text=`Family Hub ilovasiga ulaning. Mening ID raqamim: ${user.id}`;
-  if(tg?.openTelegramLink) {
-      tg.openTelegramLink("https://t.me/share/url?url=" + encodeURIComponent(text));
+  const res = await api("/api/kick", { userId: String(user.id), targetId: String(targetId) });
+  if (res?.ok) {
+    tg?.showAlert?.("Foydalanuvchi o'chirildi");
+    refreshFamily();
   } else {
-      window.open("https://t.me/share/url?text="+encodeURIComponent(text));
+    tg?.showAlert?.("Xatolik: " + (res?.error || "Ruxsat yo'q yoki endpoint yo'q"));
   }
 }
 
-// Initial Load
+// Выйти из семьи: безопасный способ через бот
+function confirmLeave() {
+  if (!confirm("Rostan ham oiladan chiqmoqchimisiz?")) return;
+
+  // Правильный flow в твоём воркере — через /unc с подтверждением кнопкой (callback).
+  // Поэтому просто откроем бота и подскажем команду.
+  if (tg?.openTelegramLink) {
+    tg.openTelegramLink("https://t.me/" + encodeURIComponent(tg?.initDataUnsafe?.user?.username || ""));
+  }
+
+  tg?.showAlert?.("Botga o'tib /unc yubor. Keyin ✅ tasdiqlaysan.");
+}
+
+/** ---------------- SEND MESSAGE ---------------- */
+async function sendMessage() {
+  const text = document.getElementById("msg").value.trim();
+  if (!text) return tg?.showAlert?.("Xabar yozing");
+
+  const res = await api("/api/send", {
+    userId: String(user.id),
+    userName: user.first_name,
+    text
+  });
+
+  if (res?.ok) {
+    tg?.showAlert?.("Xabar yuborildi! ✉️");
+    document.getElementById("msg").value = "";
+  }
+}
+
+function shareInvite() {
+  const text = `Family Hub ilovasiga ulaning. Mening ID raqamim: ${user.id}`;
+  const share = "https://t.me/share/url?text=" + encodeURIComponent(text);
+
+  if (tg?.openTelegramLink) tg.openTelegramLink(share);
+  else window.open(share, "_blank");
+}
+
+/** ---------------- SAFETY: XSS in UI ---------------- */
+function escapeHtml(s) {
+  return String(s ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+// Initial load
 loadQuickStats();
 </script>
+
 </body>
 </html>
