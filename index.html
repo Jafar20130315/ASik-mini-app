@@ -3,337 +3,316 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>Ilova</title>
+<title>Family Hub</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
-<!-- Ulanamiz Phosphor Icons (Vector ikonkalari) -->
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
 <style>
   :root {
-    /* Jiddiy va Kontrastli ranglar palitrasi */
-    --bg: #000000;         
-    --card: #1c1c1e;       
-    --text-main: #ffffff;  
-    --text-muted: #b0b0b0; 
-    
-    /* Yorqin aksent ranglar */
-    --accent: #007AFF;     
-    --success: #30D158;    
-    --danger: #FF453A;     
-    --border: #38383A;     
-    
-    --radius: 12px;
+    --bg-color: #000000;
+    --card-bg: #1c1c1e;
+    --card-bg-active: #2c2c2e;
+    --primary: #0A84FF;
+    --danger: #FF453A;
+    --text-primary: #ffffff;
+    --text-secondary: #8E8E93;
+    --separator: #38383A;
+    --radius: 16px;
   }
 
   body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: var(--bg);
-    color: var(--text-main);
-    font-size: 16px; 
-    line-height: 1.5;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
+    margin: 0;
+    padding-bottom: 90px; /* Navigatsiya uchun joy */
   }
 
-  /* Katta yoshdagilar uchun qulay oraliqlar */
-  .app { 
-    max-width: 460px; 
-    margin: 0 auto 100px; 
-    padding: 20px; 
-  }
-
-  .card {
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 18px;
-    border: 1px solid var(--border); 
-    margin-bottom: 20px;
-  }
-
-  header { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    gap: 12px; 
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  h1 { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
-  
-  .muted { 
-    color: var(--text-muted); 
-    font-size: 14px; 
-    font-weight: 500;
-  }
-
-  /* Kiritish maydonlari (Input) */
-  input, textarea {
-    width: 100%; 
-    padding: 14px; 
-    font-size: 17px; 
-    border-radius: var(--radius);
-    border: 1px solid #555; 
-    background: #2C2C2E;
-    color: #fff;
+  /* Zamonaviy Input */
+  .modern-input {
+    background: var(--card-bg);
+    border: 1px solid transparent;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 17px;
+    color: white;
+    width: 100%;
+    transition: all 0.2s ease;
     outline: none;
-    transition: border-color 0.2s;
   }
-  
-  input:focus, textarea:focus {
-    border-color: var(--accent);
-    background: #3a3a3c;
+  .modern-input:focus {
+    background: var(--card-bg-active);
+    border-color: var(--primary);
   }
 
-  input::placeholder, textarea::placeholder {
-    color: #888;
+  /* Kartalar */
+  .glass-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
   }
 
-  .row { display: flex; gap: 12px; align-items: center; }
-
-  /* Tugmalar (Buttons) */
-  .btn { 
-    cursor: pointer; 
-    border: none; 
-    padding: 14px 20px; 
-    border-radius: var(--radius); 
-    font-size: 16px;
-    font-weight: 600; 
+  /* Tugmalar */
+  .btn-action {
+    background: var(--primary);
+    color: white;
+    font-weight: 600;
+    border-radius: 12px;
+    padding: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    transition: opacity 0.2s;
-  }
-  
-  .btn i {
-    font-size: 20px; /* Ikonka o'lchami */
-  }
-  
-  .btn:active { opacity: 0.7; }
-
-  .btn-primary { 
-    background-color: var(--accent); 
-    color: white; 
-  }
-
-  .btn-ghost { 
-    background: #3A3A3C; 
-    color: var(--text-main); 
-    border: 1px solid var(--border);
-  }
-  
-  .btn-danger { 
-    background-color: var(--danger); 
-    color: white; 
-  }
-
-  /* Pastki menyu (Navigation) */
-  .nav {
-    position: fixed; 
-    bottom: 0; 
-    left: 0;
+    cursor: pointer;
+    transition: transform 0.1s;
+    border: none;
     width: 100%;
-    background: #161618;
-    padding: 12px 10px 24px 10px; 
-    display: grid; 
-    grid-template-columns: repeat(4, 1fr); 
-    gap: 8px;
-    border-top: 1px solid var(--border);
-    z-index: 100;
   }
+  .btn-action:active { transform: scale(0.98); opacity: 0.9; }
+  .btn-danger { background: var(--danger); }
+  .btn-ghost { background: var(--card-bg-active); color: var(--primary); }
 
-  .nav button {
-    background: transparent; 
-    color: #666;
-    border: 0; 
-    display: flex; 
-    flex-direction: column;
-    align-items: center; 
-    gap: 6px; 
-    font-size: 11px;
-    font-weight: 600;
-    padding: 4px;
-  }
-  
-  .nav button i {
-    font-size: 26px; /* Navigatsiya ikonkalari kattaroq */
-    margin-bottom: 2px;
-  }
-
-  .nav button.active { 
-    color: var(--accent); 
-  }
-
-  /* Ro'yxat elementlari */
-  .list-item {
-    display: flex; 
-    justify-content: space-between; 
+  /* Navigatsiya */
+  .nav-bar {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    background: rgba(28, 28, 30, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 10px;
+    display: flex;
+    justify-content: space-around;
     align-items: center;
-    gap: 15px; 
-    padding: 14px; 
-    border-radius: 8px;
-    background: #242426;
-    border-bottom: 1px solid #333;
-    margin-bottom: 8px;
+    border: 0.5px solid rgba(255,255,255,0.1);
+    z-index: 100;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   }
+
+  .nav-item {
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 8px;
+    border-radius: 12px;
+    background: transparent;
+    border: none;
+    transition: all 0.2s;
+  }
+  .nav-item i { font-size: 24px; margin-bottom: 2px; }
+  .nav-item.active { color: var(--primary); background: rgba(10, 132, 255, 0.1); }
+
+  /* Profil Avatari */
+  .profile-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--card-bg-active);
+    overflow: hidden;
+    border: 2px solid var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
   
-  .big-text { font-size: 18px; font-weight: 700; display:flex; align-items:center; gap:8px; }
-  
-  .family-list { display: flex; flex-direction: column; gap: 10px; }
-  
-  /* Helper classes */
+  /* Ro'yxat */
+  .list-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .list-row:last-child { border-bottom: none; }
+
   .hidden { display: none !important; }
-  .mb-4 { margin-bottom: 20px; }
+  
+  /* Sarlavhalar */
+  h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin: 0; }
+  h2 { font-size: 20px; font-weight: 700; margin-bottom: 15px; }
+  .subtitle { font-size: 13px; color: var(--text-secondary); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;}
 </style>
 </head>
-
 <body>
-<div class="app">
-  <header>
+
+<div class="p-5 max-w-md mx-auto">
+  
+  <!-- HEADER -->
+  <header class="flex justify-between items-center mb-6">
     <div>
-      <h1 style="margin:0;">Family Hub</h1>
-      <div class="muted" id="sub">Oilaviy hamyon</div>
+      <div class="text-sm text-gray-400 font-medium mb-1">Family Hub</div>
+      <h1>Xarajatlar</h1>
     </div>
-    <div style="text-align:right">
-      <div id="userName" style="font-size:18px; font-weight:600; color:var(--accent)">—</div>
-      <div class="muted" id="userId" style="font-family:monospace; font-size:14px"></div>
+    <div class="profile-avatar" onclick="openTab('family')">
+      <img id="userAvatar" src="" alt="User" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'ph-bold ph-user\'></i>'">
     </div>
   </header>
 
-  <!-- ADD -->
-  <section id="tab-add" class="card mb-4">
-    <div style="display:flex;justify-content:space-between;margin-bottom:15px; align-items:center;">
-      <div style="font-weight:700; font-size:18px;">Xarajat kiritish</div>
+  <!-- ADD EXPENSE -->
+  <section id="tab-add" class="animate-fade">
+    <div class="glass-card">
+      <span class="subtitle">Yangi qo'shish</span>
+      <div class="flex flex-col gap-3">
+        <input id="amount" type="number" class="modern-input text-2xl font-bold" placeholder="0 so'm">
+        <input id="cat" type="text" class="modern-input" placeholder="Nima olindi? (Non, Go'sht)">
+        <button onclick="addExpense()" class="btn-action mt-2">
+          <i class="ph-bold ph-plus"></i> Qo'shish
+        </button>
+      </div>
     </div>
 
-    <div class="row" style="margin-bottom:15px; flex-direction:column; align-items:stretch;">
-      <input id="amount" type="number" placeholder="Summa (masalan: 12000)" style="font-size:20px; font-weight:bold;">
-      <input id="cat" type="text" placeholder="Nima olindi? (Non, Go'sht)">
-    </div>
-
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px">
-      <button id="saveBtn" class="btn btn-primary" onclick="addExpense()">
-        <i class="ph-bold ph-floppy-disk"></i> Saqlash
-      </button>
-      <button class="btn btn-ghost" onclick="openTab('stats')">
-        <i class="ph-bold ph-chart-bar"></i> Ko‘rish
-      </button>
+    <div class="glass-card">
+      <span class="subtitle">Bugungi holat</span>
+      <div class="flex justify-between items-end">
+        <div>
+          <div class="text-gray-400 text-sm">Bugun sarflandi</div>
+          <div id="quickStatsToday" class="text-2xl font-bold text-white mt-1">0</div>
+        </div>
+        <button onclick="openTab('stats')" class="text-blue-500 font-medium text-sm bg-transparent border-0">To'liq &rarr;</button>
+      </div>
     </div>
   </section>
 
   <!-- STATS -->
-  <section id="tab-stats" class="card mb-4 hidden">
-    <div style="display:flex;justify-content:space-between;margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:10px;">
-      <div style="font-weight:700; font-size:18px">Statistika</div>
-      <div style="text-align:right">
-        <div class="muted">Bugun</div>
-        <div id="stToday" style="font-weight:700; font-size:20px; color:var(--success)">0</div>
+  <section id="tab-stats" class="hidden">
+    <div class="glass-card">
+      <span class="subtitle">Umumiy hisobot</span>
+      <div class="flex justify-between items-center mb-4">
+        <span class="text-gray-400">Jami (Oy):</span>
+        <span id="stMonth" class="text-2xl font-bold text-blue-500">0</span>
+      </div>
+      <div id="history" class="flex flex-col gap-1"></div>
+    </div>
+    
+    <h2 class="mt-6 px-1">Tarix</h2>
+    <div id="calendar" class="flex flex-col gap-3"></div>
+  </section>
+
+  <!-- FAMILY SETTINGS -->
+  <section id="tab-family" class="hidden">
+    <!-- Oila Nomi -->
+    <div class="glass-card text-center">
+      <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-blue-500 to-purple-600 mx-auto flex items-center justify-center mb-3 text-3xl text-white">
+        <i class="ph-bold ph-house"></i>
+      </div>
+      <h2 id="familyName" class="m-0 text-xl">Mening Oilam</h2>
+      <div class="text-gray-400 text-sm mt-1" id="familyIdDisplay">ID: ...</div>
+    </div>
+
+    <!-- Ishtirokchilar -->
+    <div class="mb-2 px-1 flex justify-between items-end">
+      <span class="subtitle mb-0">Ishtirokchilar</span>
+    </div>
+    
+    <div class="glass-card p-0 overflow-hidden">
+      <div id="familyList" class="divide-y divide-gray-800">
+        <!-- JS orqali to'ldiriladi -->
       </div>
     </div>
 
-    <div style="display:flex;justify-content:space-between;margin-bottom:20px">
-      <div class="muted" style="font-size:16px">Jami (oy):</div>
-      <div id="stMonth" style="font-weight:700; font-size:20px; color:var(--accent)">0</div>
-    </div>
+    <!-- Actions -->
+    <div class="glass-card">
+      <span class="subtitle">Boshqaruv</span>
+      <div class="flex flex-col gap-3">
+        <div id="connectBlock">
+           <p class="text-sm text-gray-400 mb-2">Boshqa oilaga qo'shilish uchun ID kiriting:</p>
+           <div class="flex gap-2">
+             <input id="connectId" type="number" class="modern-input py-2" placeholder="Oila ID">
+             <button class="btn-action w-auto px-4" onclick="connectFamily()">
+               <i class="ph-bold ph-arrow-right"></i>
+             </button>
+           </div>
+        </div>
+        
+        <button class="btn-action btn-ghost w-full justify-center mt-2" onclick="shareInvite()">
+          <i class="ph-bold ph-share-network"></i> Taklif havolasi
+        </button>
 
-    <div id="history" style="display:flex;flex-direction:column;gap:8px"></div>
-
-    <div style="margin-top:25px; margin-bottom:15px; font-weight:700; font-size:18px; color:var(--text-muted); display:flex; align-items:center; gap:8px">
-      <i class="ph-bold ph-calendar-blank"></i> Tarix bo'yicha
+        <button id="leaveBtn" class="btn-action btn-danger w-full justify-center hidden mt-2" onclick="confirmLeave()">
+          <i class="ph-bold ph-sign-out"></i> Oiladan chiqish
+        </button>
+      </div>
     </div>
-    <div id="calendar" style="display:flex;flex-direction:column;gap:12px"></div>
   </section>
 
-  <!-- SEND -->
-  <section id="tab-send" class="card mb-4 hidden">
-    <div style="font-weight:700; font-size:18px; margin-bottom:15px">Oilaga xabar yozish</div>
-    <textarea id="msg" rows="5" placeholder="Xabarni shu yerga yozing..."></textarea>
-    <div style="height:15px"></div>
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px">
-      <button class="btn btn-primary" onclick="sendMessage()">
+  <!-- SEND MESSAGE -->
+  <section id="tab-send" class="hidden">
+    <div class="glass-card">
+      <span class="subtitle">Xabar yuborish</span>
+      <textarea id="msg" rows="4" class="modern-input mb-3" placeholder="Oila a'zolariga xabar qoldiring..."></textarea>
+      <button class="btn-action" onclick="sendMessage()">
         <i class="ph-bold ph-paper-plane-right"></i> Yuborish
       </button>
-      <button class="btn btn-ghost" onclick="openTab('family')">
-        <i class="ph-bold ph-users"></i> Oila
-      </button>
     </div>
   </section>
 
-  <!-- FAMILY -->
-  <section id="tab-family" class="card mb-4 hidden">
-    <div style="display:flex;justify-content:space-between;margin-bottom:15px">
-      <div style="font-weight:700; font-size:18px">Oila a'zolari</div>
-    </div>
-
-    <div id="familyInfo" class="family-list"></div>
-
-    <div style="height:20px; border-top:1px solid #333; margin-top:10px;"></div>
-
-    <div id="connectBlock">
-      <label class="muted" style="display:block; margin-bottom:8px">Boshqa oilaga qo'shilish:</label>
-      <input id="connectId" type="number" placeholder="Oila boshlig‘i ID raqami">
-      <div style="height:12px"></div>
-      <button class="btn btn-primary" style="width:100%" onclick="connectFamily()">
-        <i class="ph-bold ph-link"></i> Ulanish so‘rash
-      </button>
-      <div style="height:12px"></div>
-      <button class="btn btn-ghost" style="width:100%" onclick="shareInvite()">
-        <i class="ph-bold ph-share-network"></i> Taklif qilish (Link)
-      </button>
-    </div>
-
-    <div id="leaveBlock" class="hidden" style="margin-top:20px; border-top:1px solid #333; padding-top:20px;">
-      <button class="btn btn-danger" style="width:100%" onclick="confirmLeave()">
-        <i class="ph-bold ph-sign-out"></i> Oiladan chiqish
-      </button>
-    </div>
-  </section>
-
-  <div style="height:80px"></div>
 </div>
 
-<!-- NAV -->
-<nav class="nav">
-  <button id="nav-add" class="active" onclick="openTab('add')">
-    <i class="ph-bold ph-plus-circle"></i>
-    Qo‘shish
+<!-- NAVIGATION -->
+<nav class="nav-bar">
+  <button id="nav-add" class="nav-item active" onclick="openTab('add')">
+    <i class="ph-fill ph-plus-circle"></i>
+    <span>Qo'shish</span>
   </button>
-  <button id="nav-stats" onclick="openTab('stats')">
-    <i class="ph-bold ph-chart-bar"></i>
-    Hisobot
+  <button id="nav-stats" class="nav-item" onclick="openTab('stats')">
+    <i class="ph-fill ph-chart-bar"></i>
+    <span>Hisobot</span>
   </button>
-  <button id="nav-send" onclick="openTab('send')">
-    <i class="ph-bold ph-envelope-simple"></i>
-    Xabar
+  <button id="nav-send" class="nav-item" onclick="openTab('send')">
+    <i class="ph-fill ph-chat-circle-text"></i>
+    <span>Xabar</span>
   </button>
-  <button id="nav-family" onclick="openTab('family')">
-    <i class="ph-bold ph-users-three"></i>
-    Oila
+  <button id="nav-family" class="nav-item" onclick="openTab('family')">
+    <i class="ph-fill ph-users-three"></i>
+    <span>Oila</span>
   </button>
 </nav>
 
 <script>
+// --- CONFIG & INIT ---
 const tg = window.Telegram?.WebApp;
 tg?.expand?.();
-
 if (tg) {
-    tg.setHeaderColor('#1c1c1e');
+    tg.setHeaderColor('#000000');
     tg.setBackgroundColor('#000000');
 }
 
+// API URL (O'zgartirish shart emas, agar Worker bir xil domenda bo'lsa)
 const API_URL = "https://asik.windowsnoutbook.workers.dev"; 
 
-const user = tg?.initDataUnsafe?.user || { id:"test_user", first_name:"Test" };
-document.getElementById("userName").innerText = user.first_name;
-document.getElementById("userId").innerText = "ID: " + user.id;
+// Mock user for testing in browser
+const user = tg?.initDataUnsafe?.user || { id: "test_999", first_name: "Test", photo_url: "" };
 
+// Set Profile Photo
+const avatarEl = document.getElementById("userAvatar");
+if(user.photo_url) {
+    avatarEl.src = user.photo_url;
+} else {
+    avatarEl.style.display = 'none';
+    avatarEl.parentElement.innerHTML = '<i class="ph-bold ph-user text-white text-xl"></i>';
+}
+
+// Global variable to store current family state
+let currentFamilyData = null;
+
+// --- API FUNCTION ---
 async function api(path, body){
   const btns = document.querySelectorAll('button');
-  btns.forEach(b => b.style.opacity = '0.5');
+  btns.forEach(b => b.style.opacity = '0.7');
   
   try {
       const r = await fetch(API_URL + path,{
@@ -343,153 +322,270 @@ async function api(path, body){
       });
       return await r.json();
   } catch(e) {
-      alert("Internetda xatolik: " + e.message);
+      tg?.showAlert?.("Xatolik: " + e.message);
       return {};
   } finally {
       btns.forEach(b => b.style.opacity = '1');
   }
 }
 
+// --- NAVIGATION ---
 function openTab(n){
   ["add","stats","send","family"].forEach(t=>{
     document.getElementById("tab-"+t).classList.toggle("hidden",t!==n);
     document.getElementById("nav-"+t)?.classList?.toggle("active",t===n);
   });
+  
+  // Header title change
+  const titles = { add: "Xarajatlar", stats: "Hisobot", send: "Xat yozish", family: "Oila Sozlamalari" };
+  document.querySelector("h1").innerText = titles[n];
+
   if(n==="stats") loadStats();
   if(n==="family") refreshFamily();
+  if(n==="add") loadQuickStats();
   
   window.scrollTo({top: 0, behavior: 'smooth'});
 }
 
+// --- LOGIC: ADD ---
 async function addExpense(){
   const amt=document.getElementById("amount").value.trim();
   const cat=document.getElementById("cat").value.trim()||"Boshqa";
-  if(!amt) return alert("Iltimos, summani yozing!");
+  if(!amt) return tg?.showAlert?.("Summani kiriting!");
 
   await api("/api/add",{userId:String(user.id),userName:user.first_name,amount:amt,cat});
   
   if(tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-  tg?.showAlert?.("✔️ Saqlandi");
+  tg?.showAlert?.("✅ Saqlandi");
 
   document.getElementById("amount").value="";
   document.getElementById("cat").value="";
-  loadStats();
+  loadQuickStats();
 }
 
-async function loadStats(){
-  const data=await api("/api/stats",{userId:String(user.id)});
-  const now=new Date();
-  let today=0, month=0;
+async function loadQuickStats() {
+    // Kichik statistika (bugun uchun)
+    const data = await api("/api/stats",{userId:String(user.id)});
+    const now = new Date();
+    let today = 0;
+    if(data && data.length) {
+        data.forEach(x => {
+            const d = new Date(x.createdAt || x.id);
+            if(d.toDateString() === now.toDateString()) today += (Number(x.amount)||0);
+        });
+    }
+    document.getElementById("quickStatsToday").innerText = today.toLocaleString() + " so'm";
+}
 
-  const history=document.getElementById("history");
-  const calendar=document.getElementById("calendar");
-  history.innerHTML=""; calendar.innerHTML="";
+// --- LOGIC: STATS ---
+async function loadStats(){
+  const data = await api("/api/stats",{userId:String(user.id)});
+  const now = new Date();
+  let month = 0;
+
+  const history = document.getElementById("history");
+  const calendar = document.getElementById("calendar");
+  history.innerHTML = ""; calendar.innerHTML = "";
 
   if(!data || !data.length) {
-      history.innerHTML = "<div class='muted' style='text-align:center; padding:20px;'>Hozircha xarajat yo'q</div>";
+      history.innerHTML = "<div class='text-center text-gray-500 py-4'>Hozircha xarajat yo'q</div>";
       return;
   }
 
   data.sort((a,b)=>b.id-a.id);
-
   const byDate={};
 
+  // Oxirgi 5 ta
+  data.slice(0, 5).forEach(x => {
+     const d = new Date(x.createdAt || x.id);
+     const div = document.createElement("div");
+     div.className = "list-row";
+     div.innerHTML = `
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-blue-500">
+                <i class="ph-bold ph-shopping-bag"></i>
+            </div>
+            <div>
+                <div class="font-semibold text-sm">${x.cat}</div>
+                <div class="text-xs text-gray-500">${x.name || 'User'} • ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}</div>
+            </div>
+        </div>
+        <div class="font-bold text-white">${Number(x.amount).toLocaleString()}</div>
+     `;
+     history.appendChild(div);
+  });
+
+  // Guruhlash
   for(const x of data){
     const d=new Date(x.createdAt||x.id);
     const key=d.toISOString().split("T")[0];
     const amount=Number(x.amount)||0;
 
-    if(d.toDateString()===now.toDateString()) today+=amount;
     if(d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear()) month+=amount;
 
     if(!byDate[key]) byDate[key]=[];
     byDate[key].push(x);
-
-    if(history.children.length < 5) {
-        const item=document.createElement("div");
-        item.className="list-item";
-        item.innerHTML=`
-            <div>
-                <div class="big-text">${x.cat}</div>
-                <div class="muted small">${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}</div>
-            </div>
-            <div class="big-text" style="color:var(--text-main)">${amount.toLocaleString()}</div>`;
-        history.appendChild(item);
-    }
   }
 
   for(const day in byDate){
     const block=document.createElement("div");
-    block.className="card";
-    block.style.marginBottom = "10px";
-    block.style.padding = "10px";
+    block.className="glass-card !p-4"; // smaller padding
     
     const d=new Date(day);
     let sum=0;
     byDate[day].forEach(x=>sum+=Number(x.amount)||0);
 
-    let html=`<div style="font-weight:700; font-size:17px; margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:5px; display:flex; justify-content:space-between;">
-        <span>${d.toLocaleDateString()}</span>
-        <span style="color:var(--accent)">${sum.toLocaleString()} so'm</span>
+    let html=`<div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-700">
+        <span class="font-bold text-gray-300">${d.toLocaleDateString()}</span>
+        <span class="text-blue-400 font-bold">${sum.toLocaleString()}</span>
     </div>`;
     
     for(const x of byDate[day]){
-      html+=`<div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:16px;">
-        <span>${x.cat}</span>
-        <span style="font-weight:600">${Number(x.amount).toLocaleString()}</span>
+      html+=`<div class="flex justify-between text-sm mb-2 last:mb-0">
+        <span class="text-gray-400">${x.cat} <span class="text-xs opacity-50">(${x.name})</span></span>
+        <span>${Number(x.amount).toLocaleString()}</span>
       </div>`;
     }
     block.innerHTML=html;
     calendar.appendChild(block);
   }
 
-  document.getElementById("stToday").innerText=today.toLocaleString();
-  document.getElementById("stMonth").innerText=month.toLocaleString();
+  document.getElementById("stMonth").innerText = month.toLocaleString() + " so'm";
 }
 
-async function sendMessage(){
-  const text=document.getElementById("msg").value.trim();
-  if(!text) return alert("Xabar yozing");
-  await api("/api/send",{userId:String(user.id),userName:user.first_name,text});
-  alert("Xabar yuborildi!");
-  document.getElementById("msg").value="";
+// --- LOGIC: FAMILY & SETTINGS ---
+async function refreshFamily(){
+  const f = await api("/api/family",{userId:String(user.id)});
+  currentFamilyData = f; // Store for logic
+  
+  const listEl = document.getElementById("familyList");
+  listEl.innerHTML = "";
+  
+  const isLeader = (String(f.leader) === String(user.id));
+  
+  // Set Family Name (Leader Name's Family)
+  // Backenddan ism kelmasa ID ko'rsatadi
+  document.getElementById("familyName").innerText = isLeader ? "Mening Oilam" : "Oila"; 
+  document.getElementById("familyIdDisplay").innerText = "Oila ID: " + f.leader;
+  
+  // Leave button logic
+  document.getElementById("leaveBtn").classList.toggle("hidden", isLeader); // Leader cannot leave, only delete app data (not implemented here)
+
+  // 1. Leader Row
+  const leaderRow = document.createElement("div");
+  leaderRow.className = "flex items-center justify-between p-4 bg-blue-900/20";
+  leaderRow.innerHTML = `
+    <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-yellow-500/20 text-yellow-500 flex items-center justify-center border border-yellow-500/50">
+            <i class="ph-fill ph-crown"></i>
+        </div>
+        <div>
+            <div class="font-bold text-white">Boshliq (ID: ${f.leader})</div>
+            <div class="text-xs text-gray-400">Admin</div>
+        </div>
+    </div>
+  `;
+  listEl.appendChild(leaderRow);
+
+  // 2. Members Rows
+  if(f.members && f.members.length > 0) {
+      f.members.forEach(memberId => {
+          if(String(memberId) === String(f.leader)) return; // Don't show leader twice
+
+          const row = document.createElement("div");
+          row.className = "flex items-center justify-between p-4";
+          
+          let actionBtn = "";
+          // Agar men leader bo'lsam, o'chirish tugmasini qo'shaman
+          if(isLeader) {
+              actionBtn = `
+                <button onclick="kickMember('${memberId}')" class="w-8 h-8 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center">
+                    <i class="ph-bold ph-trash"></i>
+                </button>
+              `;
+          }
+
+          row.innerHTML = `
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-gray-300">
+                    <i class="ph-bold ph-user"></i>
+                </div>
+                <div>
+                    <div class="font-medium text-white">Foydalanuvchi</div>
+                    <div class="text-xs text-gray-500">ID: ${memberId}</div>
+                </div>
+            </div>
+            ${actionBtn}
+          `;
+          listEl.appendChild(row);
+      });
+  } else {
+      const empty = document.createElement("div");
+      empty.className = "p-4 text-center text-gray-500 text-sm";
+      empty.innerText = "Boshqa ishtirokchilar yo'q";
+      listEl.appendChild(empty);
+  }
 }
 
 async function connectFamily(){
   const id=document.getElementById("connectId").value.trim();
-  if(!id) return alert("ID raqamini yozing");
+  if(!id) return tg?.showAlert?.("ID raqamini yozing");
+  if(id === String(user.id)) return tg?.showAlert?.("O'z IDingizni yozmang");
+  
   await api("/api/connect",{userId:String(user.id),userName:user.first_name,targetId:id});
-  alert("So'rov yuborildi");
+  tg?.showAlert?.("So'rov yuborildi ✅");
+}
+
+async function kickMember(targetId) {
+    if(!confirm("Bu foydalanuvchini oiladan o'chirmoqchimisiz?")) return;
+    
+    const res = await api("/api/kick", { userId: String(user.id), targetId: String(targetId) });
+    if(res.ok) {
+        tg?.showAlert?.("Foydalanuvchi o'chirildi");
+        refreshFamily();
+    } else {
+        tg?.showAlert?.("Xatolik: " + (res.error || "Ruxsat yo'q"));
+    }
+}
+
+async function confirmLeave(){
+    if(confirm("Rostan ham oiladan chiqmoqchimisiz?")) {
+        // Hozirgi API da /unc confirm callback orqali ishlaydi, 
+        // lekin biz to'g'ridan-to'g'ri API endpoint orqali ham qilishimiz mumkin
+        // Yoki botga /unc komandasini yuborish kerak bo'ladi.
+        // Keling, API ga oddiy 'leave' so'rovini qo'shamiz (Workerda borligini tekshiramiz)
+        // Workerda hozircha API orqali chiqish yo'q, faqat Callback orqali.
+        // Vaqtinchalik yechim:
+        tg?.close(); 
+        // Yoki workerga yangi endpoint qo'shilgan (pastda).
+        const res = await api("/api/leave", { userId: String(user.id) });
+        if(res.ok) {
+            alert("Siz oiladan chiqdingiz");
+            location.reload();
+        }
+    }
+}
+
+// --- LOGIC: SEND MESSAGE ---
+async function sendMessage(){
+  const text=document.getElementById("msg").value.trim();
+  if(!text) return tg?.showAlert?.("Xabar yozing");
+  await api("/api/send",{userId:String(user.id),userName:user.first_name,text});
+  tg?.showAlert?.("Xabar yuborildi! ✉️");
+  document.getElementById("msg").value="";
 }
 
 function shareInvite(){
   const text=`Family Hub ilovasiga ulaning. Mening ID raqamim: ${user.id}`;
-  window.open("https://t.me/share/url?text="+encodeURIComponent(text));
-}
-
-async function refreshFamily(){
-  const f=await api("/api/family",{userId:String(user.id)});
-  const box=document.getElementById("familyInfo");
-  
-  if(!f || !f.leader) {
-      box.innerHTML = "<div class='muted'>Siz yolg'izsiz</div>";
-      return;
+  if(tg?.openTelegramLink) {
+      tg.openTelegramLink("https://t.me/share/url?url=" + encodeURIComponent(text));
+  } else {
+      window.open("https://t.me/share/url?text="+encodeURIComponent(text));
   }
-
-  box.innerHTML=`<div class="list-item" style="border-left: 4px solid var(--accent)">
-    <div class="muted">Oila boshlig'i:</div>
-    <div class="big-text">${f.leader}</div>
-  </div>`;
-  
-  f.members?.forEach(m=>{
-    const d=document.createElement("div");
-    d.className="list-item";
-    // Ikonkaga o'zgartirildi
-    d.innerHTML=`<span class="big-text"><i class="ph-bold ph-user"></i> ${m}</span>`;
-    box.appendChild(d);
-  });
 }
-</script>
 
+// Initial Load
+loadQuickStats();
+</script>
 </body>
 </html>
