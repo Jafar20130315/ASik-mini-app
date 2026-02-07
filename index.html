@@ -21,31 +21,162 @@
     --separator: #38383A;
     --radius: 16px;
   }
-  body { background-color: var(--bg-color); color: var(--text-primary); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; margin:0; padding-bottom:90px;}
-  .modern-input { background: var(--card-bg); border: 1px solid transparent; border-radius: 12px; padding: 16px; font-size: 17px; color: white; width: 100%; transition: all 0.2s ease; outline: none; }
-  .modern-input:focus { background: var(--card-bg-active); border-color: var(--primary); }
-  .glass-card { background: var(--card-bg); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; position: relative; overflow: hidden; }
-  .btn-action { background: var(--primary); color: white; font-weight: 600; border-radius: 12px; padding: 14px; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; transition: transform 0.1s; border:none; width:100%; }
+
+  body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+    padding-bottom: 90px;
+  }
+
+  .modern-input {
+    background: var(--card-bg);
+    border: 1px solid transparent;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 17px;
+    color: white;
+    width: 100%;
+    transition: all 0.2s ease;
+    outline: none;
+  }
+  .modern-input:focus {
+    background: var(--card-bg-active);
+    border-color: var(--primary);
+  }
+
+  .glass-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-action {
+    background: var(--primary);
+    color: white;
+    font-weight: 600;
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: transform 0.1s;
+    border: none;
+    width: 100%;
+  }
   .btn-action:active { transform: scale(0.98); opacity: 0.9; }
   .btn-danger { background: var(--danger); }
   .btn-ghost { background: var(--card-bg-active); color: var(--primary); }
-  .nav-bar { position: fixed; bottom: 20px; left: 20px; right: 20px; background: rgba(28, 28, 30, 0.85); backdrop-filter: blur(20px); border-radius: 24px; padding: 10px; display:flex; justify-content:space-around; align-items:center; border: 0.5px solid rgba(255,255,255,0.1); z-index:100; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-  .nav-item { color: var(--text-secondary); display:flex; flex-direction:column; align-items:center; gap:4px; font-size:10px; font-weight:500; padding:8px; border-radius:12px; background:transparent; border:none; transition:all 0.2s; }
-  .nav-item i { font-size:24px; margin-bottom:2px; }
+
+  .nav-bar {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    background: rgba(28, 28, 30, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 10px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border: 0.5px solid rgba(255,255,255,0.1);
+    z-index: 100;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+
+  .nav-item {
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 8px;
+    border-radius: 12px;
+    background: transparent;
+    border: none;
+    transition: all 0.2s;
+  }
+  .nav-item i { font-size: 24px; margin-bottom: 2px; }
   .nav-item.active { color: var(--primary); background: rgba(10, 132, 255, 0.1); }
-  .profile-avatar { width:40px; height:40px; border-radius:50%; background: var(--card-bg-active); overflow:hidden; border:2px solid var(--primary); display:flex; align-items:center; justify-content:center; cursor:pointer; }
-  .profile-avatar img { width:100%; height:100%; object-fit:cover; }
-  .list-row { display:flex; justify-content:space-between; align-items:center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+
+  .profile-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--card-bg-active);
+    overflow: hidden;
+    border: 2px solid var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+  .list-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
   .list-row:last-child { border-bottom: none; }
-  .hidden { display:none !important; }
+
+  .hidden { display: none !important; }
+
   h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin: 0; }
   h2 { font-size: 20px; font-weight: 700; margin-bottom: 15px; }
   .subtitle { font-size: 13px; color: var(--text-secondary); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;}
+
+  /* LOCK overlay (not registered) */
+  .lock-wrap {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .lock-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+  }
+  .lock-title {
+    font-weight: 800;
+    font-size: 18px;
+    margin: 0 0 8px 0;
+  }
+  .lock-sub {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin: 0 0 16px 0;
+    line-height: 1.35;
+  }
 </style>
 </head>
-
 <body>
+
 <div class="p-5 max-w-md mx-auto">
+
+  <!-- HEADER -->
   <header class="flex justify-between items-center mb-6">
     <div>
       <div class="text-sm text-gray-400 font-medium mb-1">ASik</div>
@@ -56,6 +187,7 @@
     </div>
   </header>
 
+  <!-- ADD EXPENSE -->
   <section id="tab-add" class="animate-fade">
     <div class="glass-card">
       <span class="subtitle">Yangi qo'shish</span>
@@ -80,6 +212,7 @@
     </div>
   </section>
 
+  <!-- STATS -->
   <section id="tab-stats" class="hidden">
     <div class="glass-card">
       <span class="subtitle">Umumiy hisobot</span>
@@ -94,6 +227,7 @@
     <div id="calendar" class="flex flex-col gap-3"></div>
   </section>
 
+  <!-- FAMILY SETTINGS -->
   <section id="tab-family" class="hidden">
     <div class="glass-card text-center">
       <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-blue-500 to-purple-600 mx-auto flex items-center justify-center mb-3 text-3xl text-white">
@@ -135,6 +269,7 @@
     </div>
   </section>
 
+  <!-- SEND MESSAGE -->
   <section id="tab-send" class="hidden">
     <div class="glass-card">
       <span class="subtitle">Xabar yuborish</span>
@@ -144,30 +279,43 @@
       </button>
     </div>
   </section>
+
 </div>
 
+<!-- NAVIGATION -->
 <nav class="nav-bar">
   <button id="nav-add" class="nav-item active" onclick="openTab('add')">
-    <i class="ph-fill ph-plus-circle"></i><span>Qo'shish</span>
+    <i class="ph-fill ph-plus-circle"></i>
+    <span>Qo'shish</span>
   </button>
   <button id="nav-stats" class="nav-item" onclick="openTab('stats')">
-    <i class="ph-fill ph-chart-bar"></i><span>Hisobot</span>
+    <i class="ph-fill ph-chart-bar"></i>
+    <span>Hisobot</span>
   </button>
   <button id="nav-send" class="nav-item" onclick="openTab('send')">
-    <i class="ph-fill ph-chat-circle-text"></i><span>Xabar</span>
+    <i class="ph-fill ph-chat-circle-text"></i>
+    <span>Xabar</span>
   </button>
   <button id="nav-family" class="nav-item" onclick="openTab('family')">
-    <i class="ph-fill ph-users-three"></i><span>Oila</span>
+    <i class="ph-fill ph-users-three"></i>
+    <span>Oila</span>
   </button>
 </nav>
 
 <script>
+/** ---------------- CONFIG / INIT ---------------- */
 const tg = window.Telegram?.WebApp;
 tg?.expand?.();
-if (tg) { tg.setHeaderColor('#000000'); tg.setBackgroundColor('#000000'); }
+if (tg) {
+  tg.setHeaderColor('#000000');
+  tg.setBackgroundColor('#000000');
+}
 
 // Worker URL
 const API_URL = "https://asik.windowsnoutbook.workers.dev";
+
+// Bot url (REPLACE!)
+const BOT_URL = "https://t.me/ASikkeeper_bot";
 
 // Telegram user or mock
 const user = tg?.initDataUnsafe?.user || { id: "test_999", first_name: "Test", photo_url: "" };
@@ -175,22 +323,69 @@ const user = tg?.initDataUnsafe?.user || { id: "test_999", first_name: "Test", p
 // Avatar
 const avatarEl = document.getElementById("userAvatar");
 if (user.photo_url) avatarEl.src = user.photo_url;
-else { avatarEl.style.display = "none"; avatarEl.parentElement.innerHTML = '<i class="ph-bold ph-user text-white text-xl"></i>'; }
+else {
+  avatarEl.style.display = "none";
+  avatarEl.parentElement.innerHTML = '<i class="ph-bold ph-user text-white text-xl"></i>';
+}
 
 let currentFamilyData = null;
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
+/** ---------------- UI: LOCK (not registered) ---------------- */
+let locked = false;
+function showNotRegistered(msg) {
+  if (locked) return;
+  locked = true;
+
+  const text = msg || "Ushbu foydalanuvchi botda ro'yxatga o'tmagan";
+  const wrap = document.createElement("div");
+  wrap.className = "lock-wrap";
+  wrap.innerHTML = `
+    <div class="lock-card">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-12 h-12 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center text-2xl">
+          <i class="ph-bold ph-warning-circle"></i>
+        </div>
+        <div>
+          <div class="lock-title">Kirish mumkin emas</div>
+          <div class="text-xs text-gray-500">UserID: ${escapeHtml(String(user.id))}</div>
+        </div>
+      </div>
+
+      <p class="lock-sub">${escapeHtml(text)}</p>
+
+      <button class="btn-action" id="openBotBtn">
+        <i class="ph-bold ph-telegram-logo"></i> Botni ochish
+      </button>
+
+      <button class="btn-action btn-ghost mt-3" id="reloadBtn">
+        <i class="ph-bold ph-arrow-clockwise"></i> Qayta tekshirish
+      </button>
+    </div>
+  `;
+  document.body.appendChild(wrap);
+
+  document.getElementById("openBotBtn").onclick = () => {
+    if (tg?.openTelegramLink) tg.openTelegramLink(BOT_URL);
+    else window.open(BOT_URL, "_blank");
+  };
+  document.getElementById("reloadBtn").onclick = () => location.reload();
+
+  tg?.showAlert?.(text);
+}
+
+/** ---------------- STABLE API ---------------- */
 async function api(path, body, { timeoutMs = 12000, retries = 1 } = {}) {
   const btns = document.querySelectorAll("button");
   btns.forEach(b => b.style.opacity = "0.7");
-
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     let lastErr = null;
 
     for (let attempt = 0; attempt <= retries; attempt++) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+
       try {
         const r = await fetch(API_URL + path, {
           method: "POST",
@@ -202,35 +397,44 @@ async function api(path, body, { timeoutMs = 12000, retries = 1 } = {}) {
         const text = await r.text();
         let data = null;
         try { data = text ? JSON.parse(text) : null; }
-        catch { data = { ok:false, error:"non_json", raw:text }; }
+        catch { data = { ok:false, error:"non_json", message:"Server noto'g'ri javob berdi", raw:text }; }
 
-        if (!r.ok) {
-          const msg = (data && (data.message || data.error)) ? (data.message || data.error) : `HTTP ${r.status}`;
-          throw new Error(msg);
-        }
+        clearTimeout(timer);
 
-        // if backend returns {ok:false,message:"..."} but 200
-        if (data && data.ok === false && data.message) {
-          throw new Error(data.message);
+        if (!r.ok || (data && data.ok === false)) {
+          const msg = data?.message || data?.error || `HTTP ${r.status}`;
+
+          if (data?.error === "not_registered") {
+            showNotRegistered(msg);
+            return null;
+          }
+          if (data?.error === "target_not_found") {
+            tg?.showAlert?.("Xatolik: " + (data?.message || "Bunday foydalanuvchi botda mavjud emas"));
+            return null;
+          }
+
+          tg?.showAlert?.("Xatolik: " + msg);
+          return null;
         }
 
         return data;
       } catch (e) {
+        clearTimeout(timer);
         lastErr = e;
         if (attempt < retries) { await sleep(350 * (attempt + 1)); continue; }
-        throw lastErr;
+        const msg = e?.name === "AbortError" ? "Timeout. Worker javob bermadi." : (e.message || "Unknown error");
+        tg?.showAlert?.("Xatolik: " + msg);
+        return null;
       }
     }
-  } catch (e) {
-    const msg = e?.name === "AbortError" ? "Timeout. Worker javob bermadi." : (e.message || "Unknown error");
-    tg?.showAlert?.(msg);
-    return null;
+
+    throw lastErr;
   } finally {
-    clearTimeout(timer);
     btns.forEach(b => b.style.opacity = "1");
   }
 }
 
+/** ---------------- NAVIGATION ---------------- */
 function openTab(n){
   ["add","stats","send","family"].forEach(t=>{
     document.getElementById("tab-"+t).classList.toggle("hidden",t!==n);
@@ -247,6 +451,7 @@ function openTab(n){
   window.scrollTo({top: 0, behavior: "smooth"});
 }
 
+/** ---------------- ADD ---------------- */
 async function addExpense(){
   const amt=document.getElementById("amount").value.trim();
   const cat=document.getElementById("cat").value.trim()||"Boshqa";
@@ -277,7 +482,7 @@ async function loadQuickStats() {
     userPhoto: user.photo_url || ""
   });
 
-  if (!Array.isArray(data)) return;
+  if(!Array.isArray(data)) return;
 
   const now = new Date();
   let today = 0;
@@ -290,6 +495,7 @@ async function loadQuickStats() {
   document.getElementById("quickStatsToday").innerText = today.toLocaleString() + " so'm";
 }
 
+/** ---------------- STATS ---------------- */
 async function loadStats(){
   const data = await api("/api/stats",{
     userId:String(user.id),
@@ -372,6 +578,7 @@ async function loadStats(){
   document.getElementById("stMonth").innerText = month.toLocaleString() + " so'm";
 }
 
+/** ---------------- FAMILY ---------------- */
 async function refreshFamily(){
   const f = await api("/api/family",{
     userId:String(user.id),
@@ -402,6 +609,7 @@ async function refreshFamily(){
             </div>`;
   };
 
+  // leader row
   const leaderRow = document.createElement("div");
   leaderRow.className = "flex items-center justify-between p-4 bg-blue-900/20";
   leaderRow.innerHTML = `
@@ -462,40 +670,57 @@ async function connectFamily(){
     userPhoto: user.photo_url || "",
     targetId:id
   });
+
   if(res?.ok) tg?.showAlert?.("So'rov yuborildi ✅");
 }
 
 async function kickMember(targetId) {
   if(!confirm("Bu foydalanuvchini oiladan o'chirmoqchimisiz?")) return;
+
   const res = await api("/api/kick", {
     userId: String(user.id),
     userName: user.first_name,
     userPhoto: user.photo_url || "",
     targetId: String(targetId)
   });
-  if(res?.ok) { tg?.showAlert?.("Foydalanuvchi o'chirildi"); refreshFamily(); }
+
+  if(res?.ok) {
+    tg?.showAlert?.("Foydalanuvchi o'chirildi");
+    refreshFamily();
+  }
 }
 
 async function confirmLeave(){
-  if(!confirm("Rostan ham oiladan chiqmoqchimisiz?")) return;
+  if(!confirm("Rostan ham oiladan chiqmoqchisiz?")) return;
+
   const res = await api("/api/leave", {
     userId: String(user.id),
     userName: user.first_name,
     userPhoto: user.photo_url || ""
   });
-  if(res?.ok) { tg?.showAlert?.("Siz oiladan chiqdingiz"); location.reload(); }
+
+  if(res?.ok) {
+    tg?.showAlert?.("Siz oiladan chiqdingiz");
+    location.reload();
+  }
 }
 
+/** ---------------- SEND ---------------- */
 async function sendMessage(){
   const text=document.getElementById("msg").value.trim();
   if(!text) return tg?.showAlert?.("Xabar yozing");
+
   const res = await api("/api/send",{
     userId:String(user.id),
     userName:user.first_name,
     userPhoto: user.photo_url || "",
     text
   });
-  if(res?.ok) { tg?.showAlert?.("Xabar yuborildi!"); document.getElementById("msg").value=""; }
+
+  if(res?.ok) {
+    tg?.showAlert?.("Xabar yuborildi! ✉️");
+    document.getElementById("msg").value="";
+  }
 }
 
 function shareInvite(){
@@ -505,6 +730,7 @@ function shareInvite(){
   else window.open(share, "_blank");
 }
 
+/** ---------------- SAFETY ---------------- */
 function escapeHtml(s) {
   return String(s ?? "")
     .replaceAll("&", "&amp;")
@@ -514,6 +740,7 @@ function escapeHtml(s) {
     .replaceAll("'", "&#039;");
 }
 
+// Initial load (will show lock if not registered)
 loadQuickStats();
 </script>
 </body>
