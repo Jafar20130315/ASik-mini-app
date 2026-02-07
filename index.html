@@ -139,7 +139,7 @@
   h2 { font-size: 20px; font-weight: 700; margin-bottom: 15px; }
   .subtitle { font-size: 13px; color: var(--text-secondary); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;}
 
-  /* LOCK overlay (not registered / not telegram) */
+  /* LOCK overlay */
   .lock-wrap {
     position: fixed;
     inset: 0;
@@ -182,12 +182,7 @@
     position: absolute;
     inset: 0;
     transform: translateX(-100%);
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255,255,255,0.10),
-      transparent
-    );
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.10), transparent);
     animation: shimmer 1.15s infinite;
   }
   .skeleton-circle { border-radius: 9999px; }
@@ -345,7 +340,7 @@ if (!tg || !INIT_DATA) {
     <div class="lock-wrap">
       <div class="lock-card">
         <div class="flex items-center gap-3 mb-3">
-          <div class="w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-2xl">
+          <div class="w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-2xl shrink-0">
             <i class="ph-bold ph-telegram-logo"></i>
           </div>
           <div>
@@ -503,7 +498,7 @@ function showNotRegistered() {
   wrap.innerHTML = `
     <div class="lock-card">
       <div class="flex items-center gap-3 mb-3">
-        <div class="w-12 h-12 rounded-full bg-yellow-500/20 text-yellow-300 flex items-center justify-center text-2xl">
+        <div class="w-12 h-12 rounded-full bg-yellow-500/20 text-yellow-300 flex items-center justify-center text-2xl shrink-0">
           <i class="ph-bold ph-info"></i>
         </div>
         <div>
@@ -697,16 +692,16 @@ async function loadStats(){
     const div = document.createElement("div");
     div.className = "list-row";
     div.innerHTML = `
-      <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-content-center text-blue-500">
-          <i class="ph-bold ph-shopping-bag"></i>
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-blue-500 shrink-0">
+          <i class="ph-bold ph-shopping-bag leading-none"></i>
         </div>
-        <div>
-          <div class="font-semibold text-sm">${escapeHtml(x.cat || "noma'lum")}</div>
-          <div class="text-xs text-gray-500">${escapeHtml(x.name || "User")} • ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}</div>
+        <div class="min-w-0">
+          <div class="font-semibold text-sm truncate">${escapeHtml(x.cat || "noma'lum")}</div>
+          <div class="text-xs text-gray-500 truncate">${escapeHtml(x.name || "User")} • ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}</div>
         </div>
       </div>
-      <div class="font-bold text-white">${Number(x.amount||0).toLocaleString()}</div>
+      <div class="font-bold text-white shrink-0">${Number(x.amount||0).toLocaleString()}</div>
     `;
     history.appendChild(div);
   });
@@ -737,11 +732,11 @@ async function loadStats(){
     </div>`;
 
     for(const x of byDate[day]){
-      html+=`<div class="flex justify-between text-sm mb-2 last:mb-0">
-        <span class="text-gray-400">${escapeHtml(x.cat || "noma'lum")}
+      html+=`<div class="flex justify-between text-sm mb-2 last:mb-0 gap-3">
+        <span class="text-gray-400 truncate">${escapeHtml(x.cat || "noma'lum")}
           <span class="text-xs opacity-50">(${escapeHtml(x.name || "")})</span>
         </span>
-        <span>${Number(x.amount||0).toLocaleString()}</span>
+        <span class="shrink-0">${Number(x.amount||0).toLocaleString()}</span>
       </div>`;
     }
     block.innerHTML=html;
@@ -795,9 +790,9 @@ async function refreshFamily(){
   document.getElementById("leaveBtn").classList.toggle("hidden", isLeader);
 
   const avatarHtml = (photo) => {
-    if (photo) return `<img src="${photo}" class="w-10 h-10 rounded-full object-cover" />`;
-    return `<div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-gray-300">
-              <i class="ph-bold ph-user"></i>
+    if (photo) return `<img src="${photo}" class="w-10 h-10 rounded-full object-cover shrink-0" />`;
+    return `<div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 shrink-0">
+              <i class="ph-bold ph-user leading-none"></i>
             </div>`;
   };
 
@@ -805,15 +800,15 @@ async function refreshFamily(){
   const leaderRow = document.createElement("div");
   leaderRow.className = "flex items-center justify-between p-4 bg-blue-900/20";
   leaderRow.innerHTML = `
-    <div class="flex items-center gap-3">
-      <div class="relative">
+    <div class="flex items-center gap-3 min-w-0">
+      <div class="relative shrink-0">
         ${avatarHtml(leader.photo)}
-        <div class="absolute -right-1 -bottom-1 w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center">
-          <i class="ph-fill ph-crown text-black text-xs"></i>
+        <div class="absolute -right-1 -bottom-1 w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center shrink-0">
+          <i class="ph-fill ph-crown text-black text-xs leading-none"></i>
         </div>
       </div>
-      <div>
-        <div class="font-bold text-white">${escapeHtml(leader.name)} <span class="text-xs text-gray-400">(ID: ${escapeHtml(leader.id)})</span></div>
+      <div class="min-w-0">
+        <div class="font-bold text-white truncate">${escapeHtml(leader.name)} <span class="text-xs text-gray-400">(ID: ${escapeHtml(leader.id)})</span></div>
         <div class="text-xs text-gray-400">Admin</div>
       </div>
     </div>
@@ -830,19 +825,19 @@ async function refreshFamily(){
 
   for (const m of members) {
     const row = document.createElement("div");
-    row.className = "flex items-center justify-between p-4";
+    row.className = "flex items-center justify-between p-4 gap-3";
 
     const actionBtn = isLeader ? `
-      <button onclick="kickMember('${String(m.id)}')" class="w-8 h-8 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center">
-        <i class="ph-bold ph-trash"></i>
+      <button onclick="kickMember('${String(m.id)}')" class="w-8 h-8 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center shrink-0">
+        <i class="ph-bold ph-trash leading-none"></i>
       </button>` : "";
 
     row.innerHTML = `
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-3 min-w-0">
         ${avatarHtml(m.photo)}
-        <div>
-          <div class="font-medium text-white">${escapeHtml(m.name || "User")}</div>
-          <div class="text-xs text-gray-500">ID: ${escapeHtml(String(m.id))}</div>
+        <div class="min-w-0">
+          <div class="font-medium text-white truncate">${escapeHtml(m.name || "User")}</div>
+          <div class="text-xs text-gray-500 truncate">ID: ${escapeHtml(String(m.id))}</div>
         </div>
       </div>
       ${actionBtn}
