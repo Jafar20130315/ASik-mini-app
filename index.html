@@ -106,8 +106,9 @@
     background: transparent;
     border: none;
     transition: all 0.2s;
+    min-width: 60px;
   }
-  .nav-item i { font-size: 24px; margin-bottom: 2px; }
+  .nav-item i { font-size: 24px; margin-bottom: 2px; line-height: 1; }
   .nav-item.active { color: var(--primary); background: rgba(10, 132, 255, 0.1); }
 
   .profile-avatar {
@@ -139,6 +140,7 @@
   h2 { font-size: 20px; font-weight: 700; margin-bottom: 15px; }
   .subtitle { font-size: 13px; color: var(--text-secondary); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;}
 
+  /* LOCK overlay */
   .lock-wrap {
     position: fixed;
     inset: 0;
@@ -170,29 +172,64 @@
     line-height: 1.35;
   }
 
-  /* SKELETON */
-  .skeleton {
-    background: var(--card-bg-active);
+  /* Telegram-only overlay */
+  .tg-only {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.96);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .tg-only-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+    text-align: left;
+  }
+
+  /* --- Skeleton (YouTube-like) --- */
+  .skel {
     position: relative;
     overflow: hidden;
+    background: #2a2a2c;
+    border-radius: 10px;
   }
-  .skeleton::after {
+  .skel::after {
     content: "";
     position: absolute;
-    inset: 0;
-    transform: translateX(-100%);
+    top: 0;
+    left: -160px;
+    height: 100%;
+    width: 160px;
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.10), transparent);
-    animation: shimmer 1.15s infinite;
+    animation: shimmer 1.2s infinite;
   }
-  .skeleton-circle { border-radius: 9999px; }
-
   @keyframes shimmer {
-    100% { transform: translateX(100%); }
+    0% { transform: translateX(0); }
+    100% { transform: translateX(360px); }
   }
+  .skel-line { height: 12px; border-radius: 8px; }
+  .skel-line.sm { height: 10px; }
+  .skel-line.lg { height: 16px; }
+  .skel-circle { width: 36px; height: 36px; border-radius: 9999px; }
 
-  @media (prefers-reduced-motion: reduce) {
-    .skeleton::after { animation: none; }
+  .skel-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
   }
+  .skel-row:last-child { border-bottom: none; }
+
+  .muted-divider { border-color: rgba(255,255,255,0.08); }
 </style>
 </head>
 <body>
@@ -202,7 +239,7 @@
   <!-- HEADER -->
   <header class="flex justify-between items-center mb-6">
     <div>
-      <div id="brandText" class="text-sm text-gray-400 font-medium mb-1">ASik</div>
+      <div class="text-sm text-gray-400 font-medium mb-1">ASik</div>
       <h1 id="pageTitle">Xarajatlar</h1>
     </div>
     <div class="profile-avatar" onclick="openTab('family')">
@@ -211,26 +248,30 @@
   </header>
 
   <!-- ADD EXPENSE -->
-  <section id="tab-add" class="animate-fade">
+  <section id="tab-add">
     <div class="glass-card">
-      <span id="subAdd" class="subtitle">Yangi qo'shish</span>
+      <span class="subtitle" id="subNew">Yangi qo'shish</span>
       <div class="flex flex-col gap-3">
         <input id="amount" type="number" class="modern-input text-2xl font-bold" placeholder="0 so'm">
         <input id="cat" type="text" class="modern-input" placeholder="Nima olindi? (Non, Go'sht)">
-        <button id="btnAdd" onclick="addExpense()" class="btn-action mt-2">
-          <i class="ph-bold ph-plus"></i> <span id="btnAddText">Qo'shish</span>
+        <button onclick="addExpense()" class="btn-action mt-2">
+          <i class="ph-bold ph-plus leading-none"></i> <span id="btnAddText">Qo'shish</span>
         </button>
       </div>
     </div>
 
     <div class="glass-card">
-      <span id="subToday" class="subtitle">Bugungi holat</span>
+      <span class="subtitle" id="subToday">Bugungi holat</span>
       <div class="flex justify-between items-end">
         <div>
-          <div id="lblToday" class="text-gray-400 text-sm">Bugun sarflandi</div>
-          <div id="quickStatsToday" class="text-2xl font-bold text-white mt-1">0</div>
+          <div class="text-gray-400 text-sm" id="lblTodaySpent">Bugun sarflandi</div>
+          <div id="quickStatsToday" class="text-2xl font-bold text-white mt-1">
+            <!-- skeleton placeholder -->
+          </div>
         </div>
-        <button id="btnFull" onclick="openTab('stats')" class="text-blue-500 font-medium text-sm bg-transparent border-0">To'liq →</button>
+        <button onclick="openTab('stats')" class="text-blue-500 font-medium text-sm bg-transparent border-0" id="btnFull">
+          To'liq →
+        </button>
       </div>
     </div>
   </section>
@@ -238,15 +279,17 @@
   <!-- STATS -->
   <section id="tab-stats" class="hidden">
     <div class="glass-card">
-      <span id="subReport" class="subtitle">Umumiy hisobot</span>
+      <span class="subtitle" id="subReport">Umumiy hisobot</span>
       <div class="flex justify-between items-center mb-4">
-        <span id="lblMonth" class="text-gray-400">Jami (Oy):</span>
-        <span id="stMonth" class="text-2xl font-bold text-blue-500">0</span>
+        <span class="text-gray-400" id="lblMonthTotal">Jami (Oy):</span>
+        <span id="stMonth" class="text-2xl font-bold text-blue-500">
+          <!-- skeleton -->
+        </span>
       </div>
       <div id="history" class="flex flex-col gap-1"></div>
     </div>
 
-    <h2 id="hdrHistory" class="mt-6 px-1">Tarix</h2>
+    <h2 class="mt-6 px-1" id="hHistory">Tarix</h2>
     <div id="calendar" class="flex flex-col gap-3"></div>
   </section>
 
@@ -254,14 +297,14 @@
   <section id="tab-family" class="hidden">
     <div class="glass-card text-center">
       <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-blue-500 to-purple-600 mx-auto flex items-center justify-center mb-3 text-3xl text-white">
-        <i class="ph-bold ph-house"></i>
+        <i class="ph-bold ph-house leading-none"></i>
       </div>
       <h2 id="familyName" class="m-0 text-xl">Mening Oilam</h2>
       <div class="text-gray-400 text-sm mt-1" id="familyIdDisplay">ID: ...</div>
     </div>
 
     <div class="mb-2 px-1 flex justify-between items-end">
-      <span id="subMembers" class="subtitle mb-0">Ishtirokchilar</span>
+      <span class="subtitle mb-0" id="subMembers">Ishtirokchilar</span>
     </div>
 
     <div class="glass-card p-0 overflow-hidden">
@@ -269,24 +312,24 @@
     </div>
 
     <div class="glass-card">
-      <span id="subManage" class="subtitle">Boshqaruv</span>
+      <span class="subtitle" id="subControl">Boshqaruv</span>
       <div class="flex flex-col gap-3">
         <div id="connectBlock">
-          <p id="lblConnect" class="text-sm text-gray-400 mb-2">Boshqa oilaga qo'shilish uchun ID kiriting:</p>
+          <p class="text-sm text-gray-400 mb-2" id="lblConnectHelp">Boshqa oilaga qo'shilish uchun ID kiriting:</p>
           <div class="flex gap-2">
             <input id="connectId" type="number" class="modern-input py-2" placeholder="Oila ID">
             <button class="btn-action w-auto px-4" onclick="connectFamily()">
-              <i class="ph-bold ph-arrow-right"></i>
+              <i class="ph-bold ph-arrow-right leading-none"></i>
             </button>
           </div>
         </div>
 
-        <button id="btnInvite" class="btn-action btn-ghost w-full justify-center mt-2" onclick="shareInvite()">
-          <i class="ph-bold ph-share-network"></i> <span id="btnInviteText">Taklif havolasi</span>
+        <button class="btn-action btn-ghost w-full justify-center mt-2" onclick="shareInvite()">
+          <i class="ph-bold ph-share-network leading-none"></i> <span id="btnInvite">Taklif havolasi</span>
         </button>
 
         <button id="leaveBtn" class="btn-action btn-danger w-full justify-center hidden mt-2" onclick="confirmLeave()">
-          <i class="ph-bold ph-sign-out"></i> <span id="btnLeaveText">Oiladan chiqish</span>
+          <i class="ph-bold ph-sign-out leading-none"></i> <span id="btnLeave">Oiladan chiqish</span>
         </button>
       </div>
     </div>
@@ -295,10 +338,10 @@
   <!-- SEND MESSAGE -->
   <section id="tab-send" class="hidden">
     <div class="glass-card">
-      <span id="subSend" class="subtitle">Xabar yuborish</span>
+      <span class="subtitle" id="subSend">Xabar yuborish</span>
       <textarea id="msg" rows="4" class="modern-input mb-3" placeholder="Oila a'zolariga xabar qoldiring..."></textarea>
-      <button id="btnSend" class="btn-action" onclick="sendMessage()">
-        <i class="ph-bold ph-paper-plane-right"></i> <span id="btnSendText">Yuborish</span>
+      <button class="btn-action" onclick="sendMessage()">
+        <i class="ph-bold ph-paper-plane-right leading-none"></i> <span id="btnSendText">Yuborish</span>
       </button>
     </div>
   </section>
@@ -309,67 +352,67 @@
 <nav class="nav-bar">
   <button id="nav-add" class="nav-item active" onclick="openTab('add')">
     <i class="ph-fill ph-plus-circle"></i>
-    <span id="navAddText">Qo'shish</span>
+    <span id="navAdd">Qo'shish</span>
   </button>
   <button id="nav-stats" class="nav-item" onclick="openTab('stats')">
     <i class="ph-fill ph-chart-bar"></i>
-    <span id="navStatsText">Hisobot</span>
+    <span id="navStats">Hisobot</span>
   </button>
   <button id="nav-send" class="nav-item" onclick="openTab('send')">
     <i class="ph-fill ph-chat-circle-text"></i>
-    <span id="navSendText">Xabar</span>
+    <span id="navSend">Xabar</span>
   </button>
   <button id="nav-family" class="nav-item" onclick="openTab('family')">
     <i class="ph-fill ph-users-three"></i>
-    <span id="navFamilyText">Oila</span>
+    <span id="navFamily">Oila</span>
   </button>
 </nav>
 
 <script>
-/** ---------------- CONFIG / INIT ---------------- */
-const tg = window.Telegram?.WebApp;
-
-// Bot url
-const BOT_URL = "https://t.me/ASikkeeper_bot";
-
-// Only Telegram
-const INIT_DATA = tg?.initData || "";
-if (!tg || !INIT_DATA) {
-  document.body.innerHTML = `
-    <div class="lock-wrap">
-      <div class="lock-card">
-        <div class="flex items-center gap-3 mb-3">
-          <div class="w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-2xl shrink-0">
-            <i class="ph-bold ph-telegram-logo"></i>
-          </div>
-          <div>
-            <div class="lock-title">Faqat Telegram ichida</div>
-            <div class="text-xs text-gray-500">Bu sahifa oddiy brauzerda ishlamaydi</div>
-          </div>
+/** ---------------- Telegram-only guard ---------------- */
+function blockNonTelegram() {
+  const wrap = document.createElement("div");
+  wrap.className = "tg-only";
+  wrap.innerHTML = `
+    <div class="tg-only-card">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-2xl">
+          <i class="ph-bold ph-telegram-logo"></i>
         </div>
-
-        <p class="lock-sub">
-          Mini App faqat Telegram orqali ochiladi. Botni ochib, u yerdan Mini App’ni ishga tushir.
-        </p>
-
-        <a class="btn-action" href="${BOT_URL}" target="_blank" rel="noreferrer">
-          <i class="ph-bold ph-telegram-logo"></i> Botni ochish
-        </a>
+        <div>
+          <div class="lock-title">Faqat Telegram orqali</div>
+          <div class="text-xs text-gray-500">Ushbu sahifa faqat Telegram Mini App ichida ishlaydi.</div>
+        </div>
       </div>
+      <p class="lock-sub">Botdan “📆 Oylik xarajatlar” tugmasi orqali och.</p>
     </div>
   `;
-  throw new Error("Telegram only");
+  document.body.appendChild(wrap);
 }
 
-tg.expand();
-tg.setHeaderColor('#000000');
-tg.setBackgroundColor('#000000');
+const tg = window.Telegram?.WebApp;
+const isTelegram = !!(tg && tg.initData && tg.initData.length > 0 && tg.initDataUnsafe?.user?.id);
+if (!isTelegram) {
+  blockNonTelegram();
+}
+
+/** ---------------- CONFIG / INIT ---------------- */
+tg?.expand?.();
+if (tg) {
+  tg.setHeaderColor('#000000');
+  tg.setBackgroundColor('#000000');
+}
 
 // Worker URL
-const API_URL = "https://asik.windowsnoutbook.workers.dev";
+const API_URL = "https://asik.windowsnoutbook.workers.dev"; // <-- CHANGE IF NEEDED
 
-// Telegram user
-const user = tg?.initDataUnsafe?.user || { id: "test_999", first_name: "Test", photo_url: "" };
+// Bot url (REPLACE!)
+const BOT_URL = "https://t.me/ASikkeeper_bot";
+
+// Telegram user (if Telegram) or mock
+const user = isTelegram
+  ? (tg.initDataUnsafe.user)
+  : { id: "", first_name: "Guest", photo_url: "" };
 
 // Avatar
 const avatarEl = document.getElementById("userAvatar");
@@ -383,438 +426,222 @@ let currentFamilyData = null;
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
 /** ---------------- i18n (Mini App) ---------------- */
-let UI_LANG = "uz";
-
-const I18N = {
-  en: {
-    page_add: "Expenses",
-    page_stats: "Report",
-    page_send: "Write a message",
-    page_family: "Family Settings",
-
-    nav_add: "Add",
-    nav_stats: "Report",
-    nav_send: "Message",
-    nav_family: "Family",
-
-    sub_add: "Add new",
-    ph_amount: "0 UZS",
-    ph_cat: "What was bought? (Bread, Meat)",
-    btn_add: "Add",
-
-    sub_today: "Today",
-    lbl_today: "Spent today",
-    btn_full: "Full →",
-
-    sub_report: "Summary report",
-    lbl_month: "Total (Month):",
-    hdr_history: "History",
-
-    family_mine: "My Family",
-    family_other: "Family",
-    sub_members: "Members",
-    sub_manage: "Management",
-    lbl_connect: "Enter ID to join another family:",
-    ph_family_id: "Family ID",
-    btn_invite: "Invite link",
-    btn_leave: "Leave family",
-
-    sub_send: "Send message",
-    ph_msg: "Leave a message for family...",
-    btn_send: "Send",
-
-    not_registered_title: "Not registered",
-    not_registered_text: "Send /start to the bot again.",
-    open_bot: "Open bot",
-    retry: "Retry",
-
-    err_sum: "Enter amount!",
-    saved: "✅ Saved",
-    err_write_msg: "Write a message",
-    msg_sent: "Message sent! ✉️",
-
-    confirm_kick: "Do you want to remove this user from family?",
-    kicked: "User removed",
-    confirm_leave: "Are you sure you want to leave the family?",
-    left: "You left the family",
-  },
-  ru: {
-    page_add: "Расходы",
-    page_stats: "Отчёт",
-    page_send: "Сообщение",
-    page_family: "Семья",
-
-    nav_add: "Добавить",
-    nav_stats: "Отчёт",
-    nav_send: "Сообщение",
-    nav_family: "Семья",
-
-    sub_add: "Добавить",
-    ph_amount: "0 сум",
-    ph_cat: "Что купили? (Хлеб, Мясо)",
-    btn_add: "Добавить",
-
-    sub_today: "Сегодня",
-    lbl_today: "Потрачено сегодня",
-    btn_full: "Полный →",
-
-    sub_report: "Общий отчёт",
-    lbl_month: "Итого (Месяц):",
-    hdr_history: "История",
-
-    family_mine: "Моя семья",
-    family_other: "Семья",
-    sub_members: "Участники",
-    sub_manage: "Управление",
-    lbl_connect: "Введите ID чтобы присоединиться к семье:",
-    ph_family_id: "ID семьи",
-    btn_invite: "Ссылка-приглашение",
-    btn_leave: "Выйти из семьи",
-
-    sub_send: "Отправить сообщение",
-    ph_msg: "Оставьте сообщение семье...",
-    btn_send: "Отправить",
-
-    not_registered_title: "Не зарегистрирован",
-    not_registered_text: "Отправь боту /start заново.",
-    open_bot: "Открыть бота",
-    retry: "Проверить снова",
-
-    err_sum: "Введите сумму!",
-    saved: "✅ Сохранено",
-    err_write_msg: "Напишите сообщение",
-    msg_sent: "Сообщение отправлено! ✉️",
-
-    confirm_kick: "Удалить пользователя из семьи?",
-    kicked: "Пользователь удалён",
-    confirm_leave: "Точно выйти из семьи?",
-    left: "Вы вышли из семьи",
-  },
+let LANG = "uz";
+const UI = {
   uz: {
-    page_add: "Xarajatlar",
-    page_stats: "Hisobot",
-    page_send: "Xat yozish",
-    page_family: "Oila Sozlamalari",
-
+    title_add: "Xarajatlar",
+    title_stats: "Hisobot",
+    title_send: "Xat yozish",
+    title_family: "Oila Sozlamalari",
     nav_add: "Qo'shish",
     nav_stats: "Hisobot",
     nav_send: "Xabar",
     nav_family: "Oila",
-
-    sub_add: "Yangi qo'shish",
-    ph_amount: "0 so'm",
-    ph_cat: "Nima olindi? (Non, Go'sht)",
-    btn_add: "Qo'shish",
-
+    sub_new: "Yangi qo'shish",
     sub_today: "Bugungi holat",
-    lbl_today: "Bugun sarflandi",
+    lbl_today_spent: "Bugun sarflandi",
     btn_full: "To'liq →",
-
     sub_report: "Umumiy hisobot",
-    lbl_month: "Jami (Oy):",
-    hdr_history: "Tarix",
-
-    family_mine: "Mening Oilam",
-    family_other: "Oila",
+    lbl_month_total: "Jami (Oy):",
+    h_history: "Tarix",
     sub_members: "Ishtirokchilar",
-    sub_manage: "Boshqaruv",
-    lbl_connect: "Boshqa oilaga qo'shilish uchun ID kiriting:",
-    ph_family_id: "Oila ID",
+    sub_control: "Boshqaruv",
+    lbl_connect_help: "Boshqa oilaga qo'shilish uchun ID kiriting:",
     btn_invite: "Taklif havolasi",
     btn_leave: "Oiladan chiqish",
-
     sub_send: "Xabar yuborish",
-    ph_msg: "Oila a'zolariga xabar qoldiring...",
     btn_send: "Yuborish",
-
-    not_registered_title: "Ro'yxatdan o'tmagan",
-    not_registered_text: "Botga qaytadan /start yubor.",
-    open_bot: "Botni ochish",
-    retry: "Qayta tekshirish",
-
-    err_sum: "Summani kiriting!",
-    saved: "✅ Saqlandi",
-    err_write_msg: "Xabar yozing",
-    msg_sent: "Xabar yuborildi! ✉️",
-
-    confirm_kick: "Bu foydalanuvchini oiladan o'chirmoqchimisiz?",
-    kicked: "Foydalanuvchi o'chirildi",
-    confirm_leave: "Rostan ham oiladan chiqmoqchisiz?",
-    left: "Siz oiladan chiqdingiz",
+    btn_add: "Qo'shish",
+    ph_amount: "0 so'm",
+    ph_cat: "Nima olindi? (Non, Go'sht)",
+    ph_msg: "Oila a'zolariga xabar qoldiring...",
+    empty_no_cost: "Hozircha xarajat yo'q",
+    empty_no_members: "Boshqa ishtirokchilar yo'q",
+  },
+  ru: {
+    title_add: "Расходы",
+    title_stats: "Отчёт",
+    title_send: "Сообщение",
+    title_family: "Настройки семьи",
+    nav_add: "Добавить",
+    nav_stats: "Отчёт",
+    nav_send: "Сообщение",
+    nav_family: "Семья",
+    sub_new: "Добавить",
+    sub_today: "Сегодня",
+    lbl_today_spent: "Потрачено сегодня",
+    btn_full: "Полный →",
+    sub_report: "Общий отчёт",
+    lbl_month_total: "Итого (месяц):",
+    h_history: "История",
+    sub_members: "Участники",
+    sub_control: "Управление",
+    lbl_connect_help: "Чтобы подключиться к семье, введи ID:",
+    btn_invite: "Ссылка-приглашение",
+    btn_leave: "Выйти из семьи",
+    sub_send: "Отправить сообщение",
+    btn_send: "Отправить",
+    btn_add: "Добавить",
+    ph_amount: "0 сум",
+    ph_cat: "Что купили? (Хлеб, Мясо)",
+    ph_msg: "Напиши сообщение семье...",
+    empty_no_cost: "Пока нет расходов",
+    empty_no_members: "Других участников нет",
+  },
+  en: {
+    title_add: "Expenses",
+    title_stats: "Report",
+    title_send: "Message",
+    title_family: "Family Settings",
+    nav_add: "Add",
+    nav_stats: "Report",
+    nav_send: "Message",
+    nav_family: "Family",
+    sub_new: "Add new",
+    sub_today: "Today",
+    lbl_today_spent: "Spent today",
+    btn_full: "Full →",
+    sub_report: "Summary report",
+    lbl_month_total: "Total (month):",
+    h_history: "History",
+    sub_members: "Members",
+    sub_control: "Controls",
+    lbl_connect_help: "Enter family ID to join:",
+    btn_invite: "Invite link",
+    btn_leave: "Leave family",
+    sub_send: "Send message",
+    btn_send: "Send",
+    btn_add: "Add",
+    ph_amount: "0",
+    ph_cat: "What did you buy?",
+    ph_msg: "Leave a message to family...",
+    empty_no_cost: "No expenses yet",
+    empty_no_members: "No other members",
   },
   kk: {
-    page_add: "Шығындар",
-    page_stats: "Есеп",
-    page_send: "Хабарлама",
-    page_family: "Отбасы",
-
+    title_add: "Шығындар",
+    title_stats: "Есеп",
+    title_send: "Хабар",
+    title_family: "Отбасы баптауы",
     nav_add: "Қосу",
     nav_stats: "Есеп",
-    nav_send: "Хабарлама",
+    nav_send: "Хабар",
     nav_family: "Отбасы",
-
-    sub_add: "Жаңа қосу",
-    ph_amount: "0",
-    ph_cat: "Не алынды? (Нан, Ет)",
-    btn_add: "Қосу",
-
+    sub_new: "Жаңа қосу",
     sub_today: "Бүгін",
-    lbl_today: "Бүгін жұмсалды",
+    lbl_today_spent: "Бүгін жұмсалды",
     btn_full: "Толық →",
-
     sub_report: "Жалпы есеп",
-    lbl_month: "Барлығы (Ай):",
-    hdr_history: "Тарих",
-
-    family_mine: "Менің отбасым",
-    family_other: "Отбасы",
+    lbl_month_total: "Барлығы (ай):",
+    h_history: "Тарих",
     sub_members: "Қатысушылар",
-    sub_manage: "Басқару",
-    lbl_connect: "Басқа отбасыға қосылу үшін ID енгіз:",
-    ph_family_id: "Отбасы ID",
+    sub_control: "Басқару",
+    lbl_connect_help: "Отбасыға қосылу үшін ID енгіз:",
     btn_invite: "Шақыру сілтемесі",
     btn_leave: "Отбасынан шығу",
-
     sub_send: "Хабар жіберу",
-    ph_msg: "Отбасыға хабарлама қалдыр...",
     btn_send: "Жіберу",
-
-    not_registered_title: "Тіркелмеген",
-    not_registered_text: "Ботқа /start қайта жібер.",
-    open_bot: "Ботты ашу",
-    retry: "Қайта тексеру",
-
-    err_sum: "Соманы енгіз!",
-    saved: "✅ Сақталды",
-    err_write_msg: "Хабарлама жаз",
-    msg_sent: "Хабар жіберілді! ✉️",
-
-    confirm_kick: "Қолданушыны отбасыдан өшіресің бе?",
-    kicked: "Қолданушы өшірілді",
-    confirm_leave: "Шығатыныңа сенімдісің бе?",
-    left: "Сен отбасыдан шықтың",
+    btn_add: "Қосу",
+    ph_amount: "0",
+    ph_cat: "Не алынды?",
+    ph_msg: "Отбасыға хабар қалдыр...",
+    empty_no_cost: "Әзірге шығын жоқ",
+    empty_no_members: "Басқа қатысушылар жоқ",
   },
   ky: {
-    page_add: "Чыгымдар",
-    page_stats: "Отчет",
-    page_send: "Билдирүү",
-    page_family: "Үй-бүлө",
-
+    title_add: "Чыгымдар",
+    title_stats: "Отчет",
+    title_send: "Кабар",
+    title_family: "Үй-бүлө жөндөө",
     nav_add: "Кошуу",
     nav_stats: "Отчет",
-    nav_send: "Билдирүү",
+    nav_send: "Кабар",
     nav_family: "Үй-бүлө",
-
-    sub_add: "Жаңы кошуу",
-    ph_amount: "0",
-    ph_cat: "Эмне алынды? (Нан, Эт)",
-    btn_add: "Кошуу",
-
+    sub_new: "Жаңы кошуу",
     sub_today: "Бүгүн",
-    lbl_today: "Бүгүн жумшалды",
+    lbl_today_spent: "Бүгүн сарпталды",
     btn_full: "Толук →",
-
     sub_report: "Жалпы отчет",
-    lbl_month: "Жалпы (Ай):",
-    hdr_history: "Тарых",
-
-    family_mine: "Менин үй-бүлөм",
-    family_other: "Үй-бүлө",
+    lbl_month_total: "Жалпы (ай):",
+    h_history: "Тарых",
     sub_members: "Катышуучулар",
-    sub_manage: "Башкаруу",
-    lbl_connect: "Башка үй-бүлөгө кошулуу үчүн ID киргиз:",
-    ph_family_id: "Үй-бүлө ID",
+    sub_control: "Башкаруу",
+    lbl_connect_help: "Үй-бүлөгө кошулуу үчүн ID киргиз:",
     btn_invite: "Чакыруу шилтемеси",
     btn_leave: "Үй-бүлөдөн чыгуу",
-
-    sub_send: "Билдирүү жөнөтүү",
-    ph_msg: "Үй-бүлөгө билдирүү калтыр...",
-    btn_send: "Жөнөтүү",
-
-    not_registered_title: "Катталбаган",
-    not_registered_text: "Ботко /start кайра жибер.",
-    open_bot: "Ботту ачуу",
-    retry: "Кайра текшерүү",
-
-    err_sum: "Сумманы киргиз!",
-    saved: "✅ Сакталды",
-    err_write_msg: "Билдирүү жаз",
-    msg_sent: "Билдирүү жөнөтүлдү! ✉️",
-
-    confirm_kick: "Колдонуучуну үй-бүлөдөн өчүрөсүңбү?",
-    kicked: "Колдонуучу өчүрүлдү",
-    confirm_leave: "Чын эле чыгасыңбы?",
-    left: "Сен үй-бүлөдөн чыктың",
+    sub_send: "Кабар жиберүү",
+    btn_send: "Жиберүү",
+    btn_add: "Кошуу",
+    ph_amount: "0",
+    ph_cat: "Эмне алынды?",
+    ph_msg: "Үй-бүлөгө кабар калтыр...",
+    empty_no_cost: "Азырынча чыгым жок",
+    empty_no_members: "Башка катышуучу жок",
   },
 };
 
-function L(key) {
-  return (I18N[UI_LANG] && I18N[UI_LANG][key]) ? I18N[UI_LANG][key] : (I18N.uz[key] || key);
-}
+function applyLang(l) {
+  LANG = UI[l] ? l : "uz";
+  const S = UI[LANG];
 
-function applyLang() {
-  document.getElementById("pageTitle").innerText = L("page_add");
+  document.getElementById("navAdd").innerText = S.nav_add;
+  document.getElementById("navStats").innerText = S.nav_stats;
+  document.getElementById("navSend").innerText = S.nav_send;
+  document.getElementById("navFamily").innerText = S.nav_family;
 
-  document.getElementById("navAddText").innerText = L("nav_add");
-  document.getElementById("navStatsText").innerText = L("nav_stats");
-  document.getElementById("navSendText").innerText = L("nav_send");
-  document.getElementById("navFamilyText").innerText = L("nav_family");
+  document.getElementById("subNew").innerText = S.sub_new;
+  document.getElementById("subToday").innerText = S.sub_today;
+  document.getElementById("lblTodaySpent").innerText = S.lbl_today_spent;
+  document.getElementById("btnFull").innerText = S.btn_full;
 
-  document.getElementById("subAdd").innerText = L("sub_add");
-  document.getElementById("amount").placeholder = L("ph_amount");
-  document.getElementById("cat").placeholder = L("ph_cat");
-  document.getElementById("btnAddText").innerText = L("btn_add");
+  document.getElementById("subReport").innerText = S.sub_report;
+  document.getElementById("lblMonthTotal").innerText = S.lbl_month_total;
+  document.getElementById("hHistory").innerText = S.h_history;
 
-  document.getElementById("subToday").innerText = L("sub_today");
-  document.getElementById("lblToday").innerText = L("lbl_today");
-  document.getElementById("btnFull").innerText = L("btn_full");
+  document.getElementById("subMembers").innerText = S.sub_members;
+  document.getElementById("subControl").innerText = S.sub_control;
+  document.getElementById("lblConnectHelp").innerText = S.lbl_connect_help;
+  document.getElementById("btnInvite").innerText = S.btn_invite;
+  document.getElementById("btnLeave").innerText = S.btn_leave;
 
-  document.getElementById("subReport").innerText = L("sub_report");
-  document.getElementById("lblMonth").innerText = L("lbl_month");
-  document.getElementById("hdrHistory").innerText = L("hdr_history");
+  document.getElementById("subSend").innerText = S.sub_send;
+  document.getElementById("btnSendText").innerText = S.btn_send;
+  document.getElementById("btnAddText").innerText = S.btn_add;
 
-  document.getElementById("subMembers").innerText = L("sub_members");
-  document.getElementById("subManage").innerText = L("sub_manage");
-  document.getElementById("lblConnect").innerText = L("lbl_connect");
-  document.getElementById("connectId").placeholder = L("ph_family_id");
-  document.getElementById("btnInviteText").innerText = L("btn_invite");
-  document.getElementById("btnLeaveText").innerText = L("btn_leave");
+  document.getElementById("amount").placeholder = S.ph_amount;
+  document.getElementById("cat").placeholder = S.ph_cat;
+  document.getElementById("msg").placeholder = S.ph_msg;
 
-  document.getElementById("subSend").innerText = L("sub_send");
-  document.getElementById("msg").placeholder = L("ph_msg");
-  document.getElementById("btnSendText").innerText = L("btn_send");
-}
-
-/** ---------------- SKELETON HELPERS ---------------- */
-function skeletonLine(w, h, r = 10) {
-  return `<div class="skeleton" style="width:${w};height:${h};border-radius:${r}px;"></div>`;
-}
-function skeletonCircle(size) {
-  return `<div class="skeleton skeleton-circle" style="width:${size};height:${size};"></div>`;
-}
-function setSkeleton(el, html) {
-  if (!el) return;
-  if (el.dataset.prevHtml === undefined) el.dataset.prevHtml = el.innerHTML;
-  el.innerHTML = html;
-}
-function restoreSkeleton(el) {
-  if (!el) return;
-  if (el.dataset.prevHtml !== undefined) {
-    el.innerHTML = el.dataset.prevHtml;
-    delete el.dataset.prevHtml;
-  }
-}
-
-function showQuickStatsSkeleton() {
-  const el = document.getElementById("quickStatsToday");
-  if (!el) return;
-  setSkeleton(el, skeletonLine("140px", "28px", 12));
-}
-
-function showStatsSkeleton() {
-  const stMonth = document.getElementById("stMonth");
-  const history = document.getElementById("history");
-  const calendar = document.getElementById("calendar");
-
-  if (stMonth) setSkeleton(stMonth, skeletonLine("110px", "28px", 12));
-
-  if (history) {
-    history.innerHTML = Array.from({length: 5}).map(() => `
-      <div class="list-row">
-        <div class="flex items-center gap-3">
-          ${skeletonCircle("32px")}
-          <div class="flex flex-col gap-2">
-            ${skeletonLine("160px","12px",6)}
-            ${skeletonLine("120px","10px",6)}
-          </div>
-        </div>
-        ${skeletonLine("70px","14px",7)}
-      </div>
-    `).join("");
-  }
-
-  if (calendar) {
-    calendar.innerHTML = Array.from({length: 3}).map(() => `
-      <div class="glass-card !p-4">
-        <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-700">
-          ${skeletonLine("130px","14px",7)}
-          ${skeletonLine("90px","14px",7)}
-        </div>
-        ${Array.from({length: 3}).map(() => `
-          <div class="flex justify-between text-sm mb-2">
-            ${skeletonLine("170px","12px",6)}
-            ${skeletonLine("70px","12px",6)}
-          </div>
-        `).join("")}
-      </div>
-    `).join("");
-  }
-}
-
-function showFamilySkeleton() {
-  const nameEl = document.getElementById("familyName");
-  const idEl = document.getElementById("familyIdDisplay");
-  const listEl = document.getElementById("familyList");
-
-  if (nameEl) setSkeleton(nameEl, `<div class="skeleton" style="width:160px;height:20px;border-radius:10px;margin:0 auto;"></div>`);
-  if (idEl) setSkeleton(idEl, `<div class="skeleton" style="width:140px;height:12px;border-radius:6px;margin:8px auto 0;"></div>`);
-
-  if (!listEl) return;
-  if (listEl.dataset.prevHtml === undefined) listEl.dataset.prevHtml = listEl.innerHTML;
-
-  listEl.innerHTML = `
-    <div class="flex items-center justify-between p-4 bg-blue-900/20">
-      <div class="flex items-center gap-3">
-        ${skeletonCircle("40px")}
-        <div class="flex flex-col gap-2">
-          ${skeletonLine("200px","12px",6)}
-          ${skeletonLine("90px","10px",6)}
-        </div>
-      </div>
-    </div>
-    ${Array.from({length: 3}).map(() => `
-      <div class="flex items-center justify-between p-4">
-        <div class="flex items-center gap-3">
-          ${skeletonCircle("40px")}
-          <div class="flex flex-col gap-2">
-            ${skeletonLine("150px","12px",6)}
-            ${skeletonLine("110px","10px",6)}
-          </div>
-        </div>
-        ${skeletonCircle("32px")}
-      </div>
-    `).join("")}
-  `;
+  // title (current tab)
+  openTab(currentTab, { silent: true });
 }
 
 /** ---------------- UI: LOCK (not registered) ---------------- */
 let locked = false;
-function showNotRegistered() {
+function showNotRegistered(msg) {
   if (locked) return;
   locked = true;
 
+  // ONLY this phrase (no extra)
+  const text = msg || "Botga qaytadan /start yubor";
   const wrap = document.createElement("div");
   wrap.className = "lock-wrap";
   wrap.innerHTML = `
     <div class="lock-card">
       <div class="flex items-center gap-3 mb-3">
-        <div class="w-12 h-12 rounded-full bg-yellow-500/20 text-yellow-300 flex items-center justify-center text-2xl shrink-0">
-          <i class="ph-bold ph-info"></i>
+        <div class="w-12 h-12 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center text-2xl">
+          <i class="ph-bold ph-warning-circle leading-none"></i>
         </div>
         <div>
-          <div class="lock-title">${escapeHtml(L("not_registered_title"))}</div>
-          <div class="text-xs text-gray-500">UserID: ${escapeHtml(String(user.id))}</div>
+          <div class="lock-title">Kirish mumkin emas</div>
+          <div class="text-xs text-gray-500">UserID: ${escapeHtml(String(user.id || ""))}</div>
         </div>
       </div>
 
-      <p class="lock-sub">${escapeHtml(L("not_registered_text"))}</p>
+      <p class="lock-sub">${escapeHtml(text)}</p>
 
       <button class="btn-action" id="openBotBtn">
-        <i class="ph-bold ph-telegram-logo"></i> ${escapeHtml(L("open_bot"))}
-      </button>
-
-      <button class="btn-action btn-ghost mt-3" id="reloadBtn">
-        <i class="ph-bold ph-arrow-clockwise"></i> ${escapeHtml(L("retry"))}
+        <i class="ph-bold ph-telegram-logo leading-none"></i> Botni ochish
       </button>
     </div>
   `;
@@ -824,9 +651,84 @@ function showNotRegistered() {
     if (tg?.openTelegramLink) tg.openTelegramLink(BOT_URL);
     else window.open(BOT_URL, "_blank");
   };
-  document.getElementById("reloadBtn").onclick = () => location.reload();
 
-  tg?.showAlert?.(L("not_registered_text"));
+  tg?.showAlert?.(text);
+}
+
+/** ---------------- SKELETON RENDERERS ---------------- */
+function skelLine(w, cls="") {
+  return `<div class="skel skel-line ${cls}" style="width:${w}"></div>`;
+}
+function skelCircle() {
+  return `<div class="skel skel-circle"></div>`;
+}
+function renderQuickStatsSkeleton() {
+  document.getElementById("quickStatsToday").innerHTML =
+    `<div class="skel skel-line lg" style="width:140px"></div>`;
+}
+function renderMonthSkeleton() {
+  document.getElementById("stMonth").innerHTML =
+    `<div class="skel skel-line lg" style="width:120px"></div>`;
+}
+function renderHistorySkeleton() {
+  const history = document.getElementById("history");
+  history.innerHTML = `
+    ${[1,2,3,4,5].map(()=>`
+      <div class="skel-row">
+        ${skelCircle()}
+        <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+          ${skelLine("70%")}
+          ${skelLine("45%","sm")}
+        </div>
+        ${skelLine("70px")}
+      </div>
+    `).join("")}
+  `;
+}
+function renderCalendarSkeleton() {
+  const calendar = document.getElementById("calendar");
+  calendar.innerHTML = `
+    ${[1,2,3].map(()=>`
+      <div class="glass-card !p-4">
+        <div class="flex justify-between items-center mb-3 pb-2 border-b muted-divider">
+          ${skelLine("120px")}
+          ${skelLine("80px")}
+        </div>
+        <div class="flex flex-col gap-2">
+          ${skelLine("70%","sm")}
+          ${skelLine("62%","sm")}
+          ${skelLine("50%","sm")}
+        </div>
+      </div>
+    `).join("")}
+  `;
+}
+function renderFamilySkeleton() {
+  const listEl = document.getElementById("familyList");
+  listEl.innerHTML = `
+    <div class="p-4">
+      <div class="flex items-center gap-3">
+        ${skelCircle()}
+        <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+          ${skelLine("60%")}
+          ${skelLine("35%","sm")}
+        </div>
+        ${skelLine("40px")}
+      </div>
+    </div>
+    ${[1,2,3].map(()=>`
+      <div class="p-4">
+        <div class="flex items-center gap-3">
+          ${skelCircle()}
+          <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+            ${skelLine("50%")}
+            ${skelLine("30%","sm")}
+          </div>
+          ${skelLine("32px")}
+        </div>
+      </div>
+    `).join("")}
+  `;
 }
 
 /** ---------------- STABLE API ---------------- */
@@ -860,7 +762,7 @@ async function api(path, body, { timeoutMs = 12000, retries = 1 } = {}) {
           const msg = data?.message || data?.error || `HTTP ${r.status}`;
 
           if (data?.error === "not_registered") {
-            showNotRegistered();
+            showNotRegistered(msg);
             return null;
           }
           if (data?.error === "target_not_found") {
@@ -889,33 +791,57 @@ async function api(path, body, { timeoutMs = 12000, retries = 1 } = {}) {
   }
 }
 
+/** ---------------- LANG LOAD (from Worker) ---------------- */
+async function loadLangFromServer() {
+  if (!isTelegram) return;
+
+  const res = await api("/api/lang", {
+    userId: String(user.id),
+    userName: user.first_name,
+    userPhoto: user.photo_url || ""
+  });
+
+  if (res?.ok && res.lang) {
+    applyLang(res.lang);
+  } else {
+    applyLang("uz");
+  }
+}
+
 /** ---------------- NAVIGATION ---------------- */
-function openTab(n){
+let currentTab = "add";
+
+function openTab(n, { silent = false } = {}){
+  currentTab = n;
+
   ["add","stats","send","family"].forEach(t=>{
     document.getElementById("tab-"+t).classList.toggle("hidden",t!==n);
     document.getElementById("nav-"+t)?.classList?.toggle("active",t===n);
   });
 
+  const S = UI[LANG] || UI.uz;
   const titles = {
-    add: L("page_add"),
-    stats: L("page_stats"),
-    send: L("page_send"),
-    family: L("page_family")
+    add: S.title_add,
+    stats: S.title_stats,
+    send: S.title_send,
+    family: S.title_family
   };
   document.getElementById("pageTitle").innerText = titles[n] || "ASik";
 
-  if(n==="stats") loadStats();
-  if(n==="family") refreshFamily();
-  if(n==="add") loadQuickStats();
+  if (!silent) {
+    if(n==="stats") loadStats();
+    if(n==="family") refreshFamily();
+    if(n==="add") loadQuickStats();
 
-  window.scrollTo({top: 0, behavior: "smooth"});
+    window.scrollTo({top: 0, behavior: "smooth"});
+  }
 }
 
 /** ---------------- ADD ---------------- */
 async function addExpense(){
   const amt=document.getElementById("amount").value.trim();
   const cat=document.getElementById("cat").value.trim()||"Boshqa";
-  if(!amt) return tg?.showAlert?.(L("err_sum"));
+  if(!amt) return tg?.showAlert?.("Summani kiriting!");
 
   const res = await api("/api/add",{
     userId:String(user.id),
@@ -928,7 +854,7 @@ async function addExpense(){
   if(!res?.ok) return;
 
   tg?.HapticFeedback?.notificationOccurred?.("success");
-  tg?.showAlert?.(L("saved"));
+  tg?.showAlert?.("✅ Saqlandi");
 
   document.getElementById("amount").value="";
   document.getElementById("cat").value="";
@@ -936,9 +862,7 @@ async function addExpense(){
 }
 
 async function loadQuickStats() {
-  const el = document.getElementById("quickStatsToday");
-  const prev = el ? el.innerHTML : "";
-  showQuickStatsSkeleton();
+  renderQuickStatsSkeleton();
 
   const data = await api("/api/stats",{
     userId:String(user.id),
@@ -946,10 +870,7 @@ async function loadQuickStats() {
     userPhoto: user.photo_url || ""
   });
 
-  if(!Array.isArray(data)) {
-    if (el) el.innerHTML = prev;
-    return;
-  }
+  if(!Array.isArray(data)) return;
 
   const now = new Date();
   let today = 0;
@@ -959,16 +880,14 @@ async function loadQuickStats() {
     const d = new Date(ts);
     if(d.toDateString() === now.toDateString()) today += (Number(x.amount)||0);
   }
-
-  if (el) {
-    delete el.dataset.prevHtml;
-    el.innerText = today.toLocaleString() + (UI_LANG === "en" ? " UZS" : " so'm");
-  }
+  document.getElementById("quickStatsToday").innerText = today.toLocaleString() + " so'm";
 }
 
 /** ---------------- STATS ---------------- */
 async function loadStats(){
-  showStatsSkeleton();
+  renderMonthSkeleton();
+  renderHistorySkeleton();
+  renderCalendarSkeleton();
 
   const data = await api("/api/stats",{
     userId:String(user.id),
@@ -980,9 +899,11 @@ async function loadStats(){
   const calendar = document.getElementById("calendar");
   history.innerHTML = ""; calendar.innerHTML = "";
 
+  const S = UI[LANG] || UI.uz;
+
   if(!Array.isArray(data) || !data.length) {
-    history.innerHTML = "<div class='text-center text-gray-500 py-4'>Hozircha xarajat yo'q</div>";
-    document.getElementById("stMonth").innerText = UI_LANG === "en" ? "0" : "0 so'm";
+    history.innerHTML = `<div class='text-center text-gray-500 py-4'>${escapeHtml(S.empty_no_cost)}</div>`;
+    document.getElementById("stMonth").innerText = "0 so'm";
     return;
   }
 
@@ -997,16 +918,16 @@ async function loadStats(){
     const div = document.createElement("div");
     div.className = "list-row";
     div.innerHTML = `
-      <div class="flex items-center gap-3 min-w-0">
+      <div class="flex items-center gap-3">
         <div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-blue-500 shrink-0">
           <i class="ph-bold ph-shopping-bag leading-none"></i>
         </div>
-        <div class="min-w-0">
-          <div class="font-semibold text-sm truncate">${escapeHtml(x.cat || "noma'lum")}</div>
-          <div class="text-xs text-gray-500 truncate">${escapeHtml(x.name || "User")} • ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}</div>
+        <div>
+          <div class="font-semibold text-sm">${escapeHtml(x.cat || "noma'lum")}</div>
+          <div class="text-xs text-gray-500">${escapeHtml(x.name || "User")} • ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}</div>
         </div>
       </div>
-      <div class="font-bold text-white shrink-0">${Number(x.amount||0).toLocaleString()}</div>
+      <div class="font-bold text-white">${Number(x.amount||0).toLocaleString()}</div>
     `;
     history.appendChild(div);
   });
@@ -1037,23 +958,23 @@ async function loadStats(){
     </div>`;
 
     for(const x of byDate[day]){
-      html+=`<div class="flex justify-between text-sm mb-2 last:mb-0 gap-3">
-        <span class="text-gray-400 truncate">${escapeHtml(x.cat || "noma'lum")}
+      html+=`<div class="flex justify-between text-sm mb-2 last:mb-0">
+        <span class="text-gray-400">${escapeHtml(x.cat || "noma'lum")}
           <span class="text-xs opacity-50">(${escapeHtml(x.name || "")})</span>
         </span>
-        <span class="shrink-0">${Number(x.amount||0).toLocaleString()}</span>
+        <span>${Number(x.amount||0).toLocaleString()}</span>
       </div>`;
     }
     block.innerHTML=html;
     calendar.appendChild(block);
   }
 
-  document.getElementById("stMonth").innerText = month.toLocaleString() + (UI_LANG === "en" ? " UZS" : " so'm");
+  document.getElementById("stMonth").innerText = month.toLocaleString() + " so'm";
 }
 
 /** ---------------- FAMILY ---------------- */
 async function refreshFamily(){
-  showFamilySkeleton();
+  renderFamilySkeleton();
 
   const f = await api("/api/family",{
     userId:String(user.id),
@@ -1072,14 +993,14 @@ async function refreshFamily(){
 
   const isLeader = (String(leader.id) === String(user.id));
 
-  document.getElementById("familyName").innerText = isLeader ? L("family_mine") : L("family_other");
+  document.getElementById("familyName").innerText = isLeader ? "Mening Oilam" : "Oila";
   document.getElementById("familyIdDisplay").innerText = "Oila ID: " + leader.id;
 
   document.getElementById("leaveBtn").classList.toggle("hidden", isLeader);
 
   const avatarHtml = (photo) => {
-    if (photo) return `<img src="${photo}" class="w-10 h-10 rounded-full object-cover shrink-0" />`;
-    return `<div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 shrink-0">
+    if (photo) return `<img src="${photo}" class="w-10 h-10 rounded-full object-cover" />`;
+    return `<div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-gray-300">
               <i class="ph-bold ph-user leading-none"></i>
             </div>`;
   };
@@ -1088,32 +1009,34 @@ async function refreshFamily(){
   const leaderRow = document.createElement("div");
   leaderRow.className = "flex items-center justify-between p-4 bg-blue-900/20";
   leaderRow.innerHTML = `
-    <div class="flex items-center gap-3 min-w-0">
+    <div class="flex items-center gap-3">
       <div class="relative shrink-0">
         ${avatarHtml(leader.photo)}
-        <div class="absolute -right-1 -bottom-1 w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center shrink-0">
+        <div class="absolute -right-1 -bottom-1 w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center">
           <i class="ph-fill ph-crown text-black text-xs leading-none"></i>
         </div>
       </div>
-      <div class="min-w-0">
-        <div class="font-bold text-white truncate">${escapeHtml(leader.name)} <span class="text-xs text-gray-400">(ID: ${escapeHtml(leader.id)})</span></div>
+      <div>
+        <div class="font-bold text-white">${escapeHtml(leader.name)} <span class="text-xs text-gray-400">(ID: ${escapeHtml(leader.id)})</span></div>
         <div class="text-xs text-gray-400">Admin</div>
       </div>
     </div>
   `;
   listEl.appendChild(leaderRow);
 
+  const S = UI[LANG] || UI.uz;
+
   if (!members.length) {
     const empty = document.createElement("div");
     empty.className = "p-4 text-center text-gray-500 text-sm";
-    empty.innerText = "Boshqa ishtirokchilar yo'q";
+    empty.innerText = S.empty_no_members;
     listEl.appendChild(empty);
     return;
   }
 
   for (const m of members) {
     const row = document.createElement("div");
-    row.className = "flex items-center justify-between p-4 gap-3";
+    row.className = "flex items-center justify-between p-4";
 
     const actionBtn = isLeader ? `
       <button onclick="kickMember('${String(m.id)}')" class="w-8 h-8 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center shrink-0">
@@ -1121,11 +1044,11 @@ async function refreshFamily(){
       </button>` : "";
 
     row.innerHTML = `
-      <div class="flex items-center gap-3 min-w-0">
-        ${avatarHtml(m.photo)}
-        <div class="min-w-0">
-          <div class="font-medium text-white truncate">${escapeHtml(m.name || "User")}</div>
-          <div class="text-xs text-gray-500 truncate">ID: ${escapeHtml(String(m.id))}</div>
+      <div class="flex items-center gap-3">
+        <div class="shrink-0">${avatarHtml(m.photo)}</div>
+        <div>
+          <div class="font-medium text-white">${escapeHtml(m.name || "User")}</div>
+          <div class="text-xs text-gray-500">ID: ${escapeHtml(String(m.id))}</div>
         </div>
       </div>
       ${actionBtn}
@@ -1150,7 +1073,7 @@ async function connectFamily(){
 }
 
 async function kickMember(targetId) {
-  if(!confirm(L("confirm_kick"))) return;
+  if(!confirm("Bu foydalanuvchini oiladan o'chirmoqchimisiz?")) return;
 
   const res = await api("/api/kick", {
     userId: String(user.id),
@@ -1160,13 +1083,13 @@ async function kickMember(targetId) {
   });
 
   if(res?.ok) {
-    tg?.showAlert?.(L("kicked"));
+    tg?.showAlert?.("Foydalanuvchi o'chirildi");
     refreshFamily();
   }
 }
 
 async function confirmLeave(){
-  if(!confirm(L("confirm_leave"))) return;
+  if(!confirm("Rostan ham oiladan chiqmoqchisiz?")) return;
 
   const res = await api("/api/leave", {
     userId: String(user.id),
@@ -1175,7 +1098,7 @@ async function confirmLeave(){
   });
 
   if(res?.ok) {
-    tg?.showAlert?.(L("left"));
+    tg?.showAlert?.("Siz oiladan chiqdingiz");
     location.reload();
   }
 }
@@ -1183,7 +1106,7 @@ async function confirmLeave(){
 /** ---------------- SEND ---------------- */
 async function sendMessage(){
   const text=document.getElementById("msg").value.trim();
-  if(!text) return tg?.showAlert?.(L("err_write_msg"));
+  if(!text) return tg?.showAlert?.("Xabar yozing");
 
   const res = await api("/api/send",{
     userId:String(user.id),
@@ -1193,7 +1116,7 @@ async function sendMessage(){
   });
 
   if(res?.ok) {
-    tg?.showAlert?.(L("msg_sent"));
+    tg?.showAlert?.("Xabar yuborildi! ✉️");
     document.getElementById("msg").value="";
   }
 }
@@ -1215,24 +1138,17 @@ function escapeHtml(s) {
     .replaceAll("'", "&#039;");
 }
 
-/** ---------------- INIT: load lang then UI ---------------- */
-async function initApp() {
-  // get language from backend
-  const me = await api("/api/me", {
-    userId:String(user.id),
-    userName:user.first_name,
-    userPhoto: user.photo_url || ""
+/** ---------------- INITIAL LOAD ---------------- */
+(function init() {
+  if (!isTelegram) return;
+
+  // skeleton first
+  renderQuickStatsSkeleton();
+  // load language then data
+  loadLangFromServer().finally(() => {
+    loadQuickStats();
   });
-
-  if (me?.ok && me.lang) {
-    UI_LANG = String(me.lang);
-  }
-
-  applyLang();
-  loadQuickStats();
-}
-
-initApp();
+})();
 </script>
 </body>
 </html>
