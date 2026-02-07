@@ -170,6 +170,35 @@
     margin: 0 0 16px 0;
     line-height: 1.35;
   }
+
+  /* ---------------- SKELETON LOADING (YouTube-like) ---------------- */
+  .skeleton {
+    background: var(--card-bg-active);
+    position: relative;
+    overflow: hidden;
+  }
+  .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,255,255,0.10),
+      transparent
+    );
+    animation: shimmer 1.15s infinite;
+  }
+  .skeleton-circle { border-radius: 9999px; }
+
+  @keyframes shimmer {
+    100% { transform: translateX(100%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton::after { animation: none; }
+  }
 </style>
 </head>
 <body>
@@ -331,6 +360,108 @@ else {
 let currentFamilyData = null;
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
+/** ---------------- SKELETON HELPERS ---------------- */
+function skeletonLine(w, h, r = 10) {
+  return `<div class="skeleton" style="width:${w};height:${h};border-radius:${r}px;"></div>`;
+}
+function skeletonCircle(size) {
+  return `<div class="skeleton skeleton-circle" style="width:${size};height:${size};"></div>`;
+}
+function setSkeleton(el, html) {
+  if (!el) return;
+  if (el.dataset.prevHtml === undefined) el.dataset.prevHtml = el.innerHTML;
+  el.innerHTML = html;
+}
+function restoreSkeleton(el) {
+  if (!el) return;
+  if (el.dataset.prevHtml !== undefined) {
+    el.innerHTML = el.dataset.prevHtml;
+    delete el.dataset.prevHtml;
+  }
+}
+
+function showQuickStatsSkeleton() {
+  const el = document.getElementById("quickStatsToday");
+  if (!el) return;
+  setSkeleton(el, skeletonLine("140px", "28px", 12));
+}
+
+function showStatsSkeleton() {
+  const stMonth = document.getElementById("stMonth");
+  const history = document.getElementById("history");
+  const calendar = document.getElementById("calendar");
+
+  if (stMonth) setSkeleton(stMonth, skeletonLine("110px", "28px", 12));
+
+  if (history) {
+    history.innerHTML = Array.from({length: 5}).map(() => `
+      <div class="list-row">
+        <div class="flex items-center gap-3">
+          ${skeletonCircle("32px")}
+          <div class="flex flex-col gap-2">
+            ${skeletonLine("160px","12px",6)}
+            ${skeletonLine("120px","10px",6)}
+          </div>
+        </div>
+        ${skeletonLine("70px","14px",7)}
+      </div>
+    `).join("");
+  }
+
+  if (calendar) {
+    calendar.innerHTML = Array.from({length: 3}).map(() => `
+      <div class="glass-card !p-4">
+        <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-700">
+          ${skeletonLine("130px","14px",7)}
+          ${skeletonLine("90px","14px",7)}
+        </div>
+        ${Array.from({length: 3}).map(() => `
+          <div class="flex justify-between text-sm mb-2">
+            ${skeletonLine("170px","12px",6)}
+            ${skeletonLine("70px","12px",6)}
+          </div>
+        `).join("")}
+      </div>
+    `).join("");
+  }
+}
+
+function showFamilySkeleton() {
+  const nameEl = document.getElementById("familyName");
+  const idEl = document.getElementById("familyIdDisplay");
+  const listEl = document.getElementById("familyList");
+
+  if (nameEl) setSkeleton(nameEl, `<div class="skeleton" style="width:160px;height:20px;border-radius:10px;margin:0 auto;"></div>`);
+  if (idEl) setSkeleton(idEl, `<div class="skeleton" style="width:140px;height:12px;border-radius:6px;margin:8px auto 0;"></div>`);
+
+  if (!listEl) return;
+  if (listEl.dataset.prevHtml === undefined) listEl.dataset.prevHtml = listEl.innerHTML;
+
+  listEl.innerHTML = `
+    <div class="flex items-center justify-between p-4 bg-blue-900/20">
+      <div class="flex items-center gap-3">
+        ${skeletonCircle("40px")}
+        <div class="flex flex-col gap-2">
+          ${skeletonLine("200px","12px",6)}
+          ${skeletonLine("90px","10px",6)}
+        </div>
+      </div>
+    </div>
+    ${Array.from({length: 3}).map(() => `
+      <div class="flex items-center justify-between p-4">
+        <div class="flex items-center gap-3">
+          ${skeletonCircle("40px")}
+          <div class="flex flex-col gap-2">
+            ${skeletonLine("150px","12px",6)}
+            ${skeletonLine("110px","10px",6)}
+          </div>
+        </div>
+        ${skeletonCircle("32px")}
+      </div>
+    `).join("")}
+  `;
+}
+
 /** ---------------- UI: LOCK (not registered) ---------------- */
 let locked = false;
 function showNotRegistered(msg) {
@@ -343,7 +474,7 @@ function showNotRegistered(msg) {
   wrap.innerHTML = `
     <div class="lock-card">
       <div class="flex items-center gap-3 mb-3">
-        <div class="w-12 h-12 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center text-2xl">
+        <div class="w-12 h-12 rounded-full bg-red-500/20 text-red-400 flex items-center justify-content-center text-2xl">
           <i class="ph-bold ph-warning-circle"></i>
         </div>
         <div>
@@ -476,13 +607,20 @@ async function addExpense(){
 }
 
 async function loadQuickStats() {
+  const el = document.getElementById("quickStatsToday");
+  const prev = el ? el.innerHTML : "";
+  showQuickStatsSkeleton();
+
   const data = await api("/api/stats",{
     userId:String(user.id),
     userName:user.first_name,
     userPhoto: user.photo_url || ""
   });
 
-  if(!Array.isArray(data)) return;
+  if(!Array.isArray(data)) {
+    if (el) el.innerHTML = prev;
+    return;
+  }
 
   const now = new Date();
   let today = 0;
@@ -492,11 +630,17 @@ async function loadQuickStats() {
     const d = new Date(ts);
     if(d.toDateString() === now.toDateString()) today += (Number(x.amount)||0);
   }
-  document.getElementById("quickStatsToday").innerText = today.toLocaleString() + " so'm";
+
+  if (el) {
+    delete el.dataset.prevHtml;
+    el.innerText = today.toLocaleString() + " so'm";
+  }
 }
 
 /** ---------------- STATS ---------------- */
 async function loadStats(){
+  showStatsSkeleton();
+
   const data = await api("/api/stats",{
     userId:String(user.id),
     userName:user.first_name,
@@ -580,17 +724,37 @@ async function loadStats(){
 
 /** ---------------- FAMILY ---------------- */
 async function refreshFamily(){
+  // backup current UI (so we can restore on error)
+  const nameEl = document.getElementById("familyName");
+  const idEl = document.getElementById("familyIdDisplay");
+  const listEl = document.getElementById("familyList");
+  if (nameEl && nameEl.dataset.prevHtml === undefined) nameEl.dataset.prevHtml = nameEl.innerHTML;
+  if (idEl && idEl.dataset.prevHtml === undefined) idEl.dataset.prevHtml = idEl.innerHTML;
+  if (listEl && listEl.dataset.prevHtml === undefined) listEl.dataset.prevHtml = listEl.innerHTML;
+
+  showFamilySkeleton();
+
   const f = await api("/api/family",{
     userId:String(user.id),
     userName:user.first_name,
     userPhoto: user.photo_url || ""
   });
-  if (!f) return;
+  if (!f) {
+    restoreSkeleton(nameEl);
+    restoreSkeleton(idEl);
+    restoreSkeleton(listEl);
+    return;
+  }
+
+  // success: clear prevHtml markers
+  if (nameEl) delete nameEl.dataset.prevHtml;
+  if (idEl) delete idEl.dataset.prevHtml;
+  if (listEl) delete listEl.dataset.prevHtml;
 
   currentFamilyData = f;
 
-  const listEl = document.getElementById("familyList");
-  listEl.innerHTML = "";
+  const list = document.getElementById("familyList");
+  list.innerHTML = "";
 
   const leader = f.leader || { id:"", name:"Leader", photo:"" };
   const members = Array.isArray(f.members) ? f.members : [];
@@ -626,13 +790,13 @@ async function refreshFamily(){
       </div>
     </div>
   `;
-  listEl.appendChild(leaderRow);
+  list.appendChild(leaderRow);
 
   if (!members.length) {
     const empty = document.createElement("div");
     empty.className = "p-4 text-center text-gray-500 text-sm";
     empty.innerText = "Boshqa ishtirokchilar yo'q";
-    listEl.appendChild(empty);
+    list.appendChild(empty);
     return;
   }
 
@@ -655,7 +819,7 @@ async function refreshFamily(){
       </div>
       ${actionBtn}
     `;
-    listEl.appendChild(row);
+    list.appendChild(row);
   }
 }
 
