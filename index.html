@@ -21,130 +21,31 @@
     --separator: #38383A;
     --radius: 16px;
   }
-
-  body {
-    background-color: var(--bg-color);
-    color: var(--text-primary);
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    margin: 0;
-    padding-bottom: 90px;
-  }
-
-  .modern-input {
-    background: var(--card-bg);
-    border: 1px solid transparent;
-    border-radius: 12px;
-    padding: 16px;
-    font-size: 17px;
-    color: white;
-    width: 100%;
-    transition: all 0.2s ease;
-    outline: none;
-  }
-  .modern-input:focus {
-    background: var(--card-bg-active);
-    border-color: var(--primary);
-  }
-
-  .glass-card {
-    background: var(--card-bg);
-    border-radius: var(--radius);
-    padding: 20px;
-    margin-bottom: 16px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .btn-action {
-    background: var(--primary);
-    color: white;
-    font-weight: 600;
-    border-radius: 12px;
-    padding: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    cursor: pointer;
-    transition: transform 0.1s;
-    border: none;
-    width: 100%;
-  }
+  body { background-color: var(--bg-color); color: var(--text-primary); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; margin:0; padding-bottom:90px;}
+  .modern-input { background: var(--card-bg); border: 1px solid transparent; border-radius: 12px; padding: 16px; font-size: 17px; color: white; width: 100%; transition: all 0.2s ease; outline: none; }
+  .modern-input:focus { background: var(--card-bg-active); border-color: var(--primary); }
+  .glass-card { background: var(--card-bg); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; position: relative; overflow: hidden; }
+  .btn-action { background: var(--primary); color: white; font-weight: 600; border-radius: 12px; padding: 14px; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; transition: transform 0.1s; border:none; width:100%; }
   .btn-action:active { transform: scale(0.98); opacity: 0.9; }
   .btn-danger { background: var(--danger); }
   .btn-ghost { background: var(--card-bg-active); color: var(--primary); }
-
-  .nav-bar {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    right: 20px;
-    background: rgba(28, 28, 30, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-radius: 24px;
-    padding: 10px;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    border: 0.5px solid rgba(255,255,255,0.1);
-    z-index: 100;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  }
-
-  .nav-item {
-    color: var(--text-secondary);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    font-size: 10px;
-    font-weight: 500;
-    padding: 8px;
-    border-radius: 12px;
-    background: transparent;
-    border: none;
-    transition: all 0.2s;
-  }
-  .nav-item i { font-size: 24px; margin-bottom: 2px; }
+  .nav-bar { position: fixed; bottom: 20px; left: 20px; right: 20px; background: rgba(28, 28, 30, 0.85); backdrop-filter: blur(20px); border-radius: 24px; padding: 10px; display:flex; justify-content:space-around; align-items:center; border: 0.5px solid rgba(255,255,255,0.1); z-index:100; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  .nav-item { color: var(--text-secondary); display:flex; flex-direction:column; align-items:center; gap:4px; font-size:10px; font-weight:500; padding:8px; border-radius:12px; background:transparent; border:none; transition:all 0.2s; }
+  .nav-item i { font-size:24px; margin-bottom:2px; }
   .nav-item.active { color: var(--primary); background: rgba(10, 132, 255, 0.1); }
-
-  .profile-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--card-bg-active);
-    overflow: hidden;
-    border: 2px solid var(--primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-  }
-  .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
-
-  .list-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-  }
+  .profile-avatar { width:40px; height:40px; border-radius:50%; background: var(--card-bg-active); overflow:hidden; border:2px solid var(--primary); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .profile-avatar img { width:100%; height:100%; object-fit:cover; }
+  .list-row { display:flex; justify-content:space-between; align-items:center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
   .list-row:last-child { border-bottom: none; }
-
-  .hidden { display: none !important; }
-
+  .hidden { display:none !important; }
   h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin: 0; }
   h2 { font-size: 20px; font-weight: 700; margin-bottom: 15px; }
   .subtitle { font-size: 13px; color: var(--text-secondary); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;}
 </style>
 </head>
+
 <body>
-
 <div class="p-5 max-w-md mx-auto">
-
-  <!-- HEADER -->
   <header class="flex justify-between items-center mb-6">
     <div>
       <div class="text-sm text-gray-400 font-medium mb-1">ASik</div>
@@ -155,7 +56,6 @@
     </div>
   </header>
 
-  <!-- ADD EXPENSE -->
   <section id="tab-add" class="animate-fade">
     <div class="glass-card">
       <span class="subtitle">Yangi qo'shish</span>
@@ -180,7 +80,6 @@
     </div>
   </section>
 
-  <!-- STATS -->
   <section id="tab-stats" class="hidden">
     <div class="glass-card">
       <span class="subtitle">Umumiy hisobot</span>
@@ -195,7 +94,6 @@
     <div id="calendar" class="flex flex-col gap-3"></div>
   </section>
 
-  <!-- FAMILY SETTINGS -->
   <section id="tab-family" class="hidden">
     <div class="glass-card text-center">
       <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-blue-500 to-purple-600 mx-auto flex items-center justify-center mb-3 text-3xl text-white">
@@ -237,7 +135,6 @@
     </div>
   </section>
 
-  <!-- SEND MESSAGE -->
   <section id="tab-send" class="hidden">
     <div class="glass-card">
       <span class="subtitle">Xabar yuborish</span>
@@ -247,37 +144,27 @@
       </button>
     </div>
   </section>
-
 </div>
 
-<!-- NAVIGATION -->
 <nav class="nav-bar">
   <button id="nav-add" class="nav-item active" onclick="openTab('add')">
-    <i class="ph-fill ph-plus-circle"></i>
-    <span>Qo'shish</span>
+    <i class="ph-fill ph-plus-circle"></i><span>Qo'shish</span>
   </button>
   <button id="nav-stats" class="nav-item" onclick="openTab('stats')">
-    <i class="ph-fill ph-chart-bar"></i>
-    <span>Hisobot</span>
+    <i class="ph-fill ph-chart-bar"></i><span>Hisobot</span>
   </button>
   <button id="nav-send" class="nav-item" onclick="openTab('send')">
-    <i class="ph-fill ph-chat-circle-text"></i>
-    <span>Xabar</span>
+    <i class="ph-fill ph-chat-circle-text"></i><span>Xabar</span>
   </button>
   <button id="nav-family" class="nav-item" onclick="openTab('family')">
-    <i class="ph-fill ph-users-three"></i>
-    <span>Oila</span>
+    <i class="ph-fill ph-users-three"></i><span>Oila</span>
   </button>
 </nav>
 
 <script>
-/** ---------------- CONFIG / INIT ---------------- */
 const tg = window.Telegram?.WebApp;
 tg?.expand?.();
-if (tg) {
-  tg.setHeaderColor('#000000');
-  tg.setBackgroundColor('#000000');
-}
+if (tg) { tg.setHeaderColor('#000000'); tg.setBackgroundColor('#000000'); }
 
 // Worker URL
 const API_URL = "https://asik.windowsnoutbook.workers.dev";
@@ -288,15 +175,11 @@ const user = tg?.initDataUnsafe?.user || { id: "test_999", first_name: "Test", p
 // Avatar
 const avatarEl = document.getElementById("userAvatar");
 if (user.photo_url) avatarEl.src = user.photo_url;
-else {
-  avatarEl.style.display = "none";
-  avatarEl.parentElement.innerHTML = '<i class="ph-bold ph-user text-white text-xl"></i>';
-}
+else { avatarEl.style.display = "none"; avatarEl.parentElement.innerHTML = '<i class="ph-bold ph-user text-white text-xl"></i>'; }
 
 let currentFamilyData = null;
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
-/** ---------------- STABLE API ---------------- */
 async function api(path, body, { timeoutMs = 12000, retries = 1 } = {}) {
   const btns = document.querySelectorAll("button");
   btns.forEach(b => b.style.opacity = "0.7");
@@ -319,13 +202,16 @@ async function api(path, body, { timeoutMs = 12000, retries = 1 } = {}) {
         const text = await r.text();
         let data = null;
         try { data = text ? JSON.parse(text) : null; }
-        catch { data = { ok:false, error:"non_json", message:"Server noto‘g‘ri javob qaytardi", raw:text }; }
+        catch { data = { ok:false, error:"non_json", raw:text }; }
 
         if (!r.ok) {
-          const msg = (data && (data.message || data.error))
-            ? (data.message || data.error)
-            : `HTTP ${r.status}`;
+          const msg = (data && (data.message || data.error)) ? (data.message || data.error) : `HTTP ${r.status}`;
           throw new Error(msg);
+        }
+
+        // if backend returns {ok:false,message:"..."} but 200
+        if (data && data.ok === false && data.message) {
+          throw new Error(data.message);
         }
 
         return data;
@@ -337,7 +223,7 @@ async function api(path, body, { timeoutMs = 12000, retries = 1 } = {}) {
     }
   } catch (e) {
     const msg = e?.name === "AbortError" ? "Timeout. Worker javob bermadi." : (e.message || "Unknown error");
-    tg?.showAlert?.("Xatolik: " + msg);
+    tg?.showAlert?.(msg);
     return null;
   } finally {
     clearTimeout(timer);
@@ -345,7 +231,6 @@ async function api(path, body, { timeoutMs = 12000, retries = 1 } = {}) {
   }
 }
 
-/** ---------------- NAVIGATION ---------------- */
 function openTab(n){
   ["add","stats","send","family"].forEach(t=>{
     document.getElementById("tab-"+t).classList.toggle("hidden",t!==n);
@@ -362,11 +247,10 @@ function openTab(n){
   window.scrollTo({top: 0, behavior: "smooth"});
 }
 
-/** ---------------- ADD ---------------- */
 async function addExpense(){
   const amt=document.getElementById("amount").value.trim();
   const cat=document.getElementById("cat").value.trim()||"Boshqa";
-  if(!amt) return tg?.showAlert?.("Summani kiriting.");
+  if(!amt) return tg?.showAlert?.("Summani kiriting!");
 
   const res = await api("/api/add",{
     userId:String(user.id),
@@ -393,33 +277,25 @@ async function loadQuickStats() {
     userPhoto: user.photo_url || ""
   });
 
-  if (!data) return;
+  if (!Array.isArray(data)) return;
 
   const now = new Date();
   let today = 0;
-  if(Array.isArray(data)) {
-    for (const x of data) {
-      const ts = Number(x.createdAt || x.id);
-      if (!ts) continue;
-      const d = new Date(ts);
-      if(d.toDateString() === now.toDateString()) today += (Number(x.amount)||0);
-    }
+  for (const x of data) {
+    const ts = Number(x.createdAt || x.id);
+    if (!ts) continue;
+    const d = new Date(ts);
+    if(d.toDateString() === now.toDateString()) today += (Number(x.amount)||0);
   }
   document.getElementById("quickStatsToday").innerText = today.toLocaleString() + " so'm";
 }
 
-/** ---------------- STATS ---------------- */
 async function loadStats(){
   const data = await api("/api/stats",{
     userId:String(user.id),
     userName:user.first_name,
     userPhoto: user.photo_url || ""
   });
-
-  if (!data) return;
-
-  const now = new Date();
-  let month = 0;
 
   const history = document.getElementById("history");
   const calendar = document.getElementById("calendar");
@@ -430,6 +306,9 @@ async function loadStats(){
     document.getElementById("stMonth").innerText = "0 so'm";
     return;
   }
+
+  const now = new Date();
+  let month = 0;
 
   data.sort((a,b)=>Number(b.id)-Number(a.id));
   const byDate={};
@@ -493,7 +372,6 @@ async function loadStats(){
   document.getElementById("stMonth").innerText = month.toLocaleString() + " so'm";
 }
 
-/** ---------------- FAMILY (name + photo) ---------------- */
 async function refreshFamily(){
   const f = await api("/api/family",{
     userId:String(user.id),
@@ -513,7 +391,7 @@ async function refreshFamily(){
   const isLeader = (String(leader.id) === String(user.id));
 
   document.getElementById("familyName").innerText = isLeader ? "Mening Oilam" : "Oila";
-  document.getElementById("familyIdDisplay").innerText = "Oila ID'isi: " + leader.id;
+  document.getElementById("familyIdDisplay").innerText = "Oila ID: " + leader.id;
 
   document.getElementById("leaveBtn").classList.toggle("hidden", isLeader);
 
@@ -524,7 +402,6 @@ async function refreshFamily(){
             </div>`;
   };
 
-  // leader row
   const leaderRow = document.createElement("div");
   leaderRow.className = "flex items-center justify-between p-4 bg-blue-900/20";
   leaderRow.innerHTML = `
@@ -577,7 +454,7 @@ async function refreshFamily(){
 async function connectFamily(){
   const id=document.getElementById("connectId").value.trim();
   if(!id) return tg?.showAlert?.("ID raqamini yozing");
-  if(id === String(user.id)) return tg?.showAlert?.("O'z ID'ingizni yozmang");
+  if(id === String(user.id)) return tg?.showAlert?.("O'z IDingizni yozmang");
 
   const res = await api("/api/connect",{
     userId:String(user.id),
@@ -590,51 +467,35 @@ async function connectFamily(){
 
 async function kickMember(targetId) {
   if(!confirm("Bu foydalanuvchini oiladan o'chirmoqchimisiz?")) return;
-
   const res = await api("/api/kick", {
     userId: String(user.id),
     userName: user.first_name,
     userPhoto: user.photo_url || "",
     targetId: String(targetId)
   });
-
-  if(res?.ok) {
-    tg?.showAlert?.("Foydalanuvchi o'chirildi");
-    refreshFamily();
-  }
+  if(res?.ok) { tg?.showAlert?.("Foydalanuvchi o'chirildi"); refreshFamily(); }
 }
 
 async function confirmLeave(){
   if(!confirm("Rostan ham oiladan chiqmoqchimisiz?")) return;
-
   const res = await api("/api/leave", {
     userId: String(user.id),
     userName: user.first_name,
     userPhoto: user.photo_url || ""
   });
-
-  if(res?.ok) {
-    tg?.showAlert?.("Siz oiladan chiqdingiz");
-    location.reload();
-  }
+  if(res?.ok) { tg?.showAlert?.("Siz oiladan chiqdingiz"); location.reload(); }
 }
 
-/** ---------------- SEND ---------------- */
 async function sendMessage(){
   const text=document.getElementById("msg").value.trim();
   if(!text) return tg?.showAlert?.("Xabar yozing");
-
   const res = await api("/api/send",{
     userId:String(user.id),
     userName:user.first_name,
     userPhoto: user.photo_url || "",
     text
   });
-
-  if(res?.ok) {
-    tg?.showAlert?.("Xabar yuborildi! ✉️");
-    document.getElementById("msg").value="";
-  }
+  if(res?.ok) { tg?.showAlert?.("Xabar yuborildi!"); document.getElementById("msg").value=""; }
 }
 
 function shareInvite(){
@@ -644,7 +505,6 @@ function shareInvite(){
   else window.open(share, "_blank");
 }
 
-/** ---------------- SAFETY ---------------- */
 function escapeHtml(s) {
   return String(s ?? "")
     .replaceAll("&", "&amp;")
@@ -654,7 +514,6 @@ function escapeHtml(s) {
     .replaceAll("'", "&#039;");
 }
 
-// Initial load
 loadQuickStats();
 </script>
 </body>
