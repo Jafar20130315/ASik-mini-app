@@ -139,7 +139,7 @@
   h2 { font-size: 20px; font-weight: 700; margin-bottom: 15px; }
   .subtitle { font-size: 13px; color: var(--text-secondary); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;}
 
-  /* LOCK overlay (not registered) */
+  /* LOCK overlay (not registered / not telegram) */
   .lock-wrap {
     position: fixed;
     inset: 0;
@@ -334,17 +334,45 @@
 <script>
 /** ---------------- CONFIG / INIT ---------------- */
 const tg = window.Telegram?.WebApp;
-tg?.expand?.();
-if (tg) {
-  tg.setHeaderColor('#000000');
-  tg.setBackgroundColor('#000000');
+
+// Bot url
+const BOT_URL = "https://t.me/ASikkeeper_bot";
+
+// ❗ Faqat Telegram ichida ishlasin (oddiy brauzer blok)
+const INIT_DATA = tg?.initData || "";
+if (!tg || !INIT_DATA) {
+  document.body.innerHTML = `
+    <div class="lock-wrap">
+      <div class="lock-card">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-2xl">
+            <i class="ph-bold ph-telegram-logo"></i>
+          </div>
+          <div>
+            <div class="lock-title">Faqat Telegram ichida</div>
+            <div class="text-xs text-gray-500">Bu sahifa oddiy brauzerda ishlamaydi</div>
+          </div>
+        </div>
+
+        <p class="lock-sub">
+          Mini App faqat Telegram orqali ochiladi. Botni ochib, u yerdan Mini App’ni ishga tushir.
+        </p>
+
+        <a class="btn-action" href="${BOT_URL}" target="_blank" rel="noreferrer">
+          <i class="ph-bold ph-telegram-logo"></i> Botni ochish
+        </a>
+      </div>
+    </div>
+  `;
+  throw new Error("Telegram only");
 }
+
+tg.expand();
+tg.setHeaderColor('#000000');
+tg.setBackgroundColor('#000000');
 
 // Worker URL
 const API_URL = "https://asik.windowsnoutbook.workers.dev";
-
-// Bot url (REPLACE!)
-const BOT_URL = "https://t.me/ASikkeeper_bot";
 
 // Telegram user or mock
 const user = tg?.initDataUnsafe?.user || { id: "test_999", first_name: "Test", photo_url: "" };
@@ -464,21 +492,22 @@ function showFamilySkeleton() {
 
 /** ---------------- UI: LOCK (not registered) ---------------- */
 let locked = false;
-function showNotRegistered(msg) {
+function showNotRegistered() {
   if (locked) return;
   locked = true;
 
-  const text = msg || "Ushbu foydalanuvchi botda ro'yxatga o'tmagan";
+  const text = "Botga qaytadan /start yubor.";
+
   const wrap = document.createElement("div");
   wrap.className = "lock-wrap";
   wrap.innerHTML = `
     <div class="lock-card">
       <div class="flex items-center gap-3 mb-3">
-        <div class="w-12 h-12 rounded-full bg-red-500/20 text-red-400 flex items-center justify-content-center text-2xl">
-          <i class="ph-bold ph-warning-circle"></i>
+        <div class="w-12 h-12 rounded-full bg-yellow-500/20 text-yellow-300 flex items-center justify-center text-2xl">
+          <i class="ph-bold ph-info"></i>
         </div>
         <div>
-          <div class="lock-title">Kirish mumkin emas</div>
+          <div class="lock-title">Ro'yxatdan o'tmagan</div>
           <div class="text-xs text-gray-500">UserID: ${escapeHtml(String(user.id))}</div>
         </div>
       </div>
@@ -536,7 +565,7 @@ async function api(path, body, { timeoutMs = 12000, retries = 1 } = {}) {
           const msg = data?.message || data?.error || `HTTP ${r.status}`;
 
           if (data?.error === "not_registered") {
-            showNotRegistered(msg);
+            showNotRegistered();
             return null;
           }
           if (data?.error === "target_not_found") {
@@ -669,7 +698,7 @@ async function loadStats(){
     div.className = "list-row";
     div.innerHTML = `
       <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-blue-500">
+        <div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-content-center text-blue-500">
           <i class="ph-bold ph-shopping-bag"></i>
         </div>
         <div>
@@ -724,10 +753,10 @@ async function loadStats(){
 
 /** ---------------- FAMILY ---------------- */
 async function refreshFamily(){
-  // backup current UI (so we can restore on error)
   const nameEl = document.getElementById("familyName");
   const idEl = document.getElementById("familyIdDisplay");
   const listEl = document.getElementById("familyList");
+
   if (nameEl && nameEl.dataset.prevHtml === undefined) nameEl.dataset.prevHtml = nameEl.innerHTML;
   if (idEl && idEl.dataset.prevHtml === undefined) idEl.dataset.prevHtml = idEl.innerHTML;
   if (listEl && listEl.dataset.prevHtml === undefined) listEl.dataset.prevHtml = listEl.innerHTML;
@@ -746,7 +775,6 @@ async function refreshFamily(){
     return;
   }
 
-  // success: clear prevHtml markers
   if (nameEl) delete nameEl.dataset.prevHtml;
   if (idEl) delete idEl.dataset.prevHtml;
   if (listEl) delete listEl.dataset.prevHtml;
