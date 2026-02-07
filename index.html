@@ -353,7 +353,7 @@ function openTab(n){
   });
 
   const titles = { add: "Xarajatlar", stats: "Hisobot", send: "Xat yozish", family: "Oila Sozlamalari" };
-  document.querySelector("h1").innerText = titles[n] || "Family Hub";
+  document.querySelector("h1").innerText = titles[n] || "ASik";
 
   if(n==="stats") loadStats();
   if(n==="family") refreshFamily();
@@ -366,7 +366,7 @@ function openTab(n){
 async function addExpense(){
   const amt=document.getElementById("amount").value.trim();
   const cat=document.getElementById("cat").value.trim()||"Boshqa";
-  if(!amt) return tg?.showAlert?.("Summani kiriting!");
+  if(!amt) return tg?.showAlert?.("Summani kiriting.");
 
   const res = await api("/api/add",{
     userId:String(user.id),
@@ -513,7 +513,7 @@ async function refreshFamily(){
   const isLeader = (String(leader.id) === String(user.id));
 
   document.getElementById("familyName").innerText = isLeader ? "Mening Oilam" : "Oila";
-  document.getElementById("familyIdDisplay").innerText = "Oila ID: " + leader.id;
+  document.getElementById("familyIdDisplay").innerText = "Oila ID'isi: " + leader.id;
 
   document.getElementById("leaveBtn").classList.toggle("hidden", isLeader);
 
@@ -577,7 +577,7 @@ async function refreshFamily(){
 async function connectFamily(){
   const id=document.getElementById("connectId").value.trim();
   if(!id) return tg?.showAlert?.("ID raqamini yozing");
-  if(id === String(user.id)) return tg?.showAlert?.("O'z IDingizni yozmang");
+  if(id === String(user.id)) return tg?.showAlert?.("O'z ID'ingizni yozmang");
 
   const res = await api("/api/connect",{
     userId:String(user.id),
