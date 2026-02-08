@@ -11,140 +11,233 @@
 
 <style>
   :root {
-    --bg-color: #000000;
-    --card-bg: #1c1c1e;
-    --card-bg-active: #2c2c2e;
-    --primary: #0A84FF;
-    --danger: #FF453A;
+    --bg-dark: #0f0f11;
+    --card-bg: rgba(30, 30, 32, 0.65);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --primary-gradient: linear-gradient(135deg, #0A84FF 0%, #0056b3 100%);
+    --danger-gradient: linear-gradient(135deg, #FF453A 0%, #b3261e 100%);
     --text-primary: #ffffff;
-    --text-secondary: #8E8E93;
-    --separator: #38383A;
-    --radius: 16px;
+    --text-secondary: #9ca3af;
+    --radius: 20px;
+    --glow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   }
 
   body {
-    background-color: var(--bg-color);
+    background-color: var(--bg-dark);
+    /* Subtle background gradient for depth */
+    background-image: 
+        radial-gradient(circle at 0% 0%, rgba(10, 132, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(10, 132, 255, 0.05) 0%, transparent 50%);
+    background-attachment: fixed;
     color: var(--text-primary);
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     margin: 0;
-    padding-bottom: 90px;
+    padding-bottom: 110px; /* Increased padding for floating nav */
+    min-height: 100vh;
+  }
+
+  /* Fade in animation */
+  .fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  @keyframes fadeIn {
+    to { opacity: 1; transform: translateY(0); }
   }
 
   .modern-input {
-    background: var(--card-bg);
-    border: 1px solid transparent;
-    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
     padding: 16px;
     font-size: 17px;
     color: white;
     width: 100%;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     outline: none;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
   }
   .modern-input:focus {
-    background: var(--card-bg-active);
-    border-color: var(--primary);
+    background: rgba(0, 0, 0, 0.5);
+    border-color: #0A84FF;
+    box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.15);
+  }
+  .modern-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
   }
 
   .glass-card {
     background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
+    border-top: 1px solid rgba(255, 255, 255, 0.15); /* Top highlight */
     border-radius: var(--radius);
-    padding: 20px;
+    padding: 22px;
     margin-bottom: 16px;
     position: relative;
     overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    animation: fadeIn 0.5s ease-out forwards;
   }
 
   .btn-action {
-    background: var(--primary);
+    background: var(--primary-gradient);
     color: white;
     font-weight: 600;
-    border-radius: 12px;
-    padding: 14px;
+    border-radius: 16px;
+    padding: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     cursor: pointer;
-    transition: transform 0.1s;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     border: none;
     width: 100%;
+    box-shadow: 0 4px 15px rgba(10, 132, 255, 0.3);
+    position: relative;
+    overflow: hidden;
   }
-  .btn-action:active { transform: scale(0.98); opacity: 0.9; }
-  .btn-danger { background: var(--danger); }
-  .btn-ghost { background: var(--card-bg-active); color: var(--primary); }
+  .btn-action::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(rgba(255,255,255,0.1), transparent);
+    pointer-events: none;
+  }
+  .btn-action:active { transform: scale(0.96); opacity: 0.9; }
+  
+  .btn-danger { 
+    background: var(--danger-gradient);
+    box-shadow: 0 4px 15px rgba(255, 69, 58, 0.3);
+  }
+  .btn-ghost { 
+    background: rgba(255, 255, 255, 0.05); 
+    color: #0A84FF; 
+    box-shadow: none;
+    border: 1px solid rgba(10, 132, 255, 0.2);
+  }
 
+  /* Floating Navigation */
   .nav-bar {
     position: fixed;
-    bottom: 20px;
+    bottom: 24px;
     left: 20px;
     right: 20px;
-    background: rgba(28, 28, 30, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-radius: 24px;
-    padding: 10px;
+    background: rgba(20, 20, 22, 0.85);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border-radius: 28px;
+    padding: 12px 16px;
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     align-items: center;
-    border: 0.5px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.1);
     z-index: 100;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.6);
   }
 
   .nav-item {
-    color: var(--text-secondary);
+    color: #6b7280;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 4px;
     font-size: 10px;
-    font-weight: 500;
-    padding: 8px;
-    border-radius: 12px;
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 16px;
     background: transparent;
     border: none;
-    transition: all 0.2s;
-    min-width: 60px;
+    transition: all 0.3s ease;
+    min-width: 64px;
+    position: relative;
   }
-  .nav-item i { font-size: 24px; margin-bottom: 2px; line-height: 1; }
-  .nav-item.active { color: var(--primary); background: rgba(10, 132, 255, 0.1); }
+  .nav-item i { 
+    font-size: 24px; 
+    margin-bottom: 2px; 
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .nav-item.active { 
+    color: #ffffff; 
+  }
+  /* Glowing background for active item */
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, rgba(10, 132, 255, 0.2) 0%, transparent 70%);
+    border-radius: 16px;
+    z-index: -1;
+  }
+  .nav-item.active i {
+    transform: translateY(-2px);
+    color: #0A84FF;
+    text-shadow: 0 0 12px rgba(10, 132, 255, 0.6);
+  }
 
   .profile-avatar {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    background: var(--card-bg-active);
+    background: #2c2c2e;
     overflow: hidden;
-    border: 2px solid var(--primary);
+    border: 2px solid rgba(255,255,255,0.1);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    transition: transform 0.2s;
   }
+  .profile-avatar:active { transform: scale(0.9); }
   .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
   .list-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    transition: background 0.2s;
   }
   .list-row:last-child { border-bottom: none; }
-
+  
   .hidden { display: none !important; }
 
-  h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin: 0; }
-  h2 { font-size: 20px; font-weight: 700; margin-bottom: 15px; }
-  .subtitle { font-size: 13px; color: var(--text-secondary); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;}
+  h1 { 
+    font-size: 32px; 
+    font-weight: 800; 
+    letter-spacing: -1px; 
+    margin: 0; 
+    background: linear-gradient(to right, #fff, #cbd5e1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  h2 { font-size: 20px; font-weight: 700; margin-bottom: 15px; letter-spacing: -0.5px; }
+  
+  .subtitle { 
+    font-size: 12px; 
+    color: var(--text-secondary); 
+    font-weight: 600; 
+    text-transform: uppercase; 
+    letter-spacing: 1.5px; 
+    margin-bottom: 12px; 
+    display: block;
+    opacity: 0.8;
+  }
 
   /* LOCK overlay */
   .lock-wrap {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.92);
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
     z-index: 9999;
     display: flex;
     align-items: center;
@@ -154,29 +247,30 @@
   .lock-card {
     width: 100%;
     max-width: 420px;
-    background: var(--card-bg);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 20px;
-    padding: 22px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+    background: #1c1c1e;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    text-align: center;
   }
   .lock-title {
     font-weight: 800;
-    font-size: 18px;
-    margin: 0 0 8px 0;
+    font-size: 20px;
+    margin: 10px 0 8px 0;
   }
   .lock-sub {
     color: var(--text-secondary);
-    font-size: 14px;
-    margin: 0 0 16px 0;
-    line-height: 1.35;
+    font-size: 15px;
+    margin: 0 0 20px 0;
+    line-height: 1.5;
   }
 
   /* Telegram-only overlay */
   .tg-only {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.96);
+    background: #000;
     z-index: 99999;
     display: flex;
     align-items: center;
@@ -186,20 +280,19 @@
   .tg-only-card {
     width: 100%;
     max-width: 420px;
-    background: var(--card-bg);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 20px;
-    padding: 22px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.55);
-    text-align: left;
+    background: #1c1c1e;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 24px;
+    padding: 30px;
+    text-align: center;
   }
 
-  /* --- Skeleton (YouTube-like) --- */
+  /* --- Skeleton (Shimmer) --- */
   .skel {
     position: relative;
     overflow: hidden;
-    background: #2a2a2c;
-    border-radius: 10px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
   }
   .skel::after {
     content: "";
@@ -208,54 +301,79 @@
     left: -160px;
     height: 100%;
     width: 160px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.10), transparent);
-    animation: shimmer 1.2s infinite;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    animation: shimmer 1.5s infinite;
   }
   @keyframes shimmer {
     0% { transform: translateX(0); }
-    100% { transform: translateX(360px); }
+    100% { transform: translateX(400px); }
   }
-  .skel-line { height: 12px; border-radius: 8px; }
+  .skel-line { height: 12px; border-radius: 6px; }
   .skel-line.sm { height: 10px; }
-  .skel-line.lg { height: 16px; }
-  .skel-circle { width: 36px; height: 36px; border-radius: 9999px; }
+  .skel-line.lg { height: 20px; }
+  .skel-circle { width: 40px; height: 40px; border-radius: 50%; }
 
   .skel-row {
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 12px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
   }
   .skel-row:last-child { border-bottom: none; }
 
-  .muted-divider { border-color: rgba(255,255,255,0.08); }
+  /* Amount specific style */
+  #amount {
+    font-feature-settings: "tnum";
+    letter-spacing: -1px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.03);
+    text-align: center;
+    padding: 20px;
+    font-size: 32px;
+  }
+  #amount:focus {
+    background: rgba(0,0,0,0.4);
+    border-color: #0A84FF;
+  }
+
+  /* Icon circle styles */
+  .icon-circle {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: rgba(10, 132, 255, 0.15);
+    display: flex; align-items: center; justify-content: center;
+    color: #0A84FF;
+    flex-shrink: 0;
+  }
 </style>
 </head>
 <body>
 
-<div class="p-5 max-w-md mx-auto">
+<div class="p-5 max-w-md mx-auto fade-in">
 
   <!-- HEADER -->
-  <header class="flex justify-between items-center mb-6">
+  <header class="flex justify-between items-center mb-8 pt-2">
     <div>
-      <div class="text-sm text-gray-400 font-medium mb-1">ASik</div>
+      <div class="text-xs text-blue-400 font-bold uppercase tracking-wider mb-1">Hamyon</div>
       <h1 id="pageTitle">Xarajatlar</h1>
     </div>
     <div class="profile-avatar" onclick="openTab('family')">
-      <img id="userAvatar" src="" alt="User" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'ph-bold ph-user\'></i>'">
+      <!-- Fixed onError to prevent null reference -->
+      <img id="userAvatar" src="" alt="User" onerror="this.style.display='none'; if(this.parentElement) this.parentElement.innerHTML='<i class=\'ph-bold ph-user text-white text-xl\'></i>'">
     </div>
   </header>
 
   <!-- ADD EXPENSE -->
-  <section id="tab-add">
+  <section id="tab-add" class="fade-in">
     <div class="glass-card">
       <span class="subtitle" id="subNew">Yangi qo'shish</span>
-      <div class="flex flex-col gap-3">
-        <input id="amount" type="number" class="modern-input text-2xl font-bold" placeholder="0 so'm">
+      <div class="flex flex-col gap-4">
+        <input id="amount" type="number" class="modern-input font-bold" placeholder="0">
         <input id="cat" type="text" class="modern-input" placeholder="Nima olindi? (Non, Go'sht)">
         <button onclick="addExpense()" class="btn-action mt-2">
-          <i class="ph-bold ph-plus leading-none"></i> <span id="btnAddText">Qo'shish</span>
+          <i class="ph-bold ph-plus leading-none text-lg"></i> <span id="btnAddText">Qo'shish</span>
         </button>
       </div>
     </div>
@@ -264,12 +382,12 @@
       <span class="subtitle" id="subToday">Bugungi holat</span>
       <div class="flex justify-between items-end">
         <div>
-          <div class="text-gray-400 text-sm" id="lblTodaySpent">Bugun sarflandi</div>
-          <div id="quickStatsToday" class="text-2xl font-bold text-white mt-1">
+          <div class="text-gray-400 text-sm mb-1" id="lblTodaySpent">Bugun sarflandi</div>
+          <div id="quickStatsToday" class="text-3xl font-bold text-white tracking-tight">
             <!-- skeleton placeholder -->
           </div>
         </div>
-        <button onclick="openTab('stats')" class="text-blue-500 font-medium text-sm bg-transparent border-0" id="btnFull">
+        <button onclick="openTab('stats')" class="text-blue-400 font-semibold text-sm bg-blue-500/10 px-3 py-1.5 rounded-lg border border-blue-500/20 active:scale-95 transition-transform" id="btnFull">
           To'liq →
         </button>
       </div>
@@ -277,38 +395,45 @@
   </section>
 
   <!-- STATS -->
-  <section id="tab-stats" class="hidden">
+  <section id="tab-stats" class="hidden fade-in">
     <div class="glass-card">
       <span class="subtitle" id="subReport">Umumiy hisobot</span>
-      <div class="flex justify-between items-center mb-4">
-        <span class="text-gray-400" id="lblMonthTotal">Jami (Oy):</span>
-        <span id="stMonth" class="text-2xl font-bold text-blue-500">
+      <div class="flex justify-between items-center mb-6 p-2 bg-white/5 rounded-xl border border-white/5">
+        <span class="text-gray-400 text-sm ml-2" id="lblMonthTotal">Jami (Oy):</span>
+        <span id="stMonth" class="text-2xl font-bold text-blue-400 mr-2">
           <!-- skeleton -->
         </span>
       </div>
       <div id="history" class="flex flex-col gap-1"></div>
     </div>
 
-    <h2 class="mt-6 px-1" id="hHistory">Tarix</h2>
+    <h2 class="mt-8 px-2 text-gray-300 flex items-center gap-2" id="hHistory">
+        <i class="ph-fill ph-clock-counter-clockwise text-gray-500"></i> Tarix
+    </h2>
     <div id="calendar" class="flex flex-col gap-3"></div>
   </section>
 
   <!-- FAMILY SETTINGS -->
-  <section id="tab-family" class="hidden">
-    <div class="glass-card text-center">
-      <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-blue-500 to-purple-600 mx-auto flex items-center justify-center mb-3 text-3xl text-white">
-        <i class="ph-bold ph-house leading-none"></i>
+  <section id="tab-family" class="hidden fade-in">
+    <div class="glass-card text-center relative overflow-hidden">
+      <!-- Decor background -->
+      <div class="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-blue-500/20 to-transparent pointer-events-none"></div>
+      
+      <div class="relative z-10">
+        <div class="w-24 h-24 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 mx-auto flex items-center justify-center mb-4 text-4xl text-white shadow-lg shadow-blue-500/30">
+            <i class="ph-bold ph-house-line leading-none"></i>
+        </div>
+        <h2 id="familyName" class="m-0 text-2xl">Mening Oilam</h2>
+        <div class="inline-block bg-white/10 rounded-full px-3 py-1 text-xs text-gray-300 mt-2 font-mono border border-white/10" id="familyIdDisplay">ID: ...</div>
       </div>
-      <h2 id="familyName" class="m-0 text-xl">Mening Oilam</h2>
-      <div class="text-gray-400 text-sm mt-1" id="familyIdDisplay">ID: ...</div>
     </div>
 
-    <div class="mb-2 px-1 flex justify-between items-end">
+    <div class="mb-3 px-2 flex justify-between items-end">
       <span class="subtitle mb-0" id="subMembers">Ishtirokchilar</span>
     </div>
 
     <div class="glass-card p-0 overflow-hidden">
-      <div id="familyList" class="divide-y divide-gray-800"></div>
+      <div id="familyList" class="divide-y divide-white/5"></div>
     </div>
 
     <div class="glass-card">
@@ -317,8 +442,8 @@
         <div id="connectBlock">
           <p class="text-sm text-gray-400 mb-2" id="lblConnectHelp">Boshqa oilaga qo'shilish uchun ID kiriting:</p>
           <div class="flex gap-2">
-            <input id="connectId" type="number" class="modern-input py-2" placeholder="Oila ID">
-            <button class="btn-action w-auto px-4" onclick="connectFamily()">
+            <input id="connectId" type="number" class="modern-input py-3" placeholder="Oila ID">
+            <button class="btn-action w-auto px-5" onclick="connectFamily()">
               <i class="ph-bold ph-arrow-right leading-none"></i>
             </button>
           </div>
@@ -336,10 +461,10 @@
   </section>
 
   <!-- SEND MESSAGE -->
-  <section id="tab-send" class="hidden">
+  <section id="tab-send" class="hidden fade-in">
     <div class="glass-card">
       <span class="subtitle" id="subSend">Xabar yuborish</span>
-      <textarea id="msg" rows="4" class="modern-input mb-3" placeholder="Oila a'zolariga xabar qoldiring..."></textarea>
+      <textarea id="msg" rows="5" class="modern-input mb-4 resize-none" placeholder="Oila a'zolariga xabar qoldiring..."></textarea>
       <button class="btn-action" onclick="sendMessage()">
         <i class="ph-bold ph-paper-plane-right leading-none"></i> <span id="btnSendText">Yuborish</span>
       </button>
@@ -375,16 +500,16 @@ function blockNonTelegram() {
   wrap.className = "tg-only";
   wrap.innerHTML = `
     <div class="tg-only-card">
-      <div class="flex items-center gap-3 mb-3">
-        <div class="w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-2xl">
+      <div class="flex flex-col items-center gap-4 mb-3">
+        <div class="w-16 h-16 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-3xl shadow-[0_0_20px_rgba(59,130,246,0.3)]">
           <i class="ph-bold ph-telegram-logo"></i>
         </div>
         <div>
           <div class="lock-title">Faqat Telegram orqali</div>
-          <div class="text-xs text-gray-500">Ushbu sahifa faqat Telegram Mini App ichida ishlaydi.</div>
+          <div class="text-sm text-gray-500">Ushbu sahifa faqat Telegram Mini App ichida ishlaydi.</div>
         </div>
       </div>
-      <p class="lock-sub">Botdan “📆 Oylik xarajatlar” tugmasi orqali och.</p>
+      <p class="lock-sub mt-2">Botdan “📆 Oylik xarajatlar” tugmasi orqali och.</p>
     </div>
   `;
   document.body.appendChild(wrap);
@@ -399,8 +524,8 @@ if (!isTelegram) {
 /** ---------------- CONFIG / INIT ---------------- */
 tg?.expand?.();
 if (tg) {
-  tg.setHeaderColor('#000000');
-  tg.setBackgroundColor('#000000');
+  tg.setHeaderColor('#0f0f11'); // Matches body bg
+  tg.setBackgroundColor('#0f0f11');
 }
 
 // Worker URL
@@ -419,7 +544,9 @@ const avatarEl = document.getElementById("userAvatar");
 if (user.photo_url) avatarEl.src = user.photo_url;
 else {
   avatarEl.style.display = "none";
-  avatarEl.parentElement.innerHTML = '<i class="ph-bold ph-user text-white text-xl"></i>';
+  if(avatarEl.parentElement) {
+    avatarEl.parentElement.innerHTML = '<i class="ph-bold ph-user text-white text-xl"></i>';
+  }
 }
 
 let currentFamilyData = null;
@@ -628,13 +755,13 @@ function showNotRegistered(msg) {
   wrap.className = "lock-wrap";
   wrap.innerHTML = `
     <div class="lock-card">
-      <div class="flex items-center gap-3 mb-3">
-        <div class="w-12 h-12 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center text-2xl">
+      <div class="flex flex-col items-center gap-4 mb-3">
+        <div class="w-16 h-16 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center text-3xl shadow-[0_0_20px_rgba(239,68,68,0.3)]">
           <i class="ph-bold ph-warning-circle leading-none"></i>
         </div>
         <div>
           <div class="lock-title">Kirish mumkin emas</div>
-          <div class="text-xs text-gray-500">UserID: ${escapeHtml(String(user.id || ""))}</div>
+          <div class="text-xs text-gray-400">UserID: ${escapeHtml(String(user.id || ""))}</div>
         </div>
       </div>
 
@@ -917,17 +1044,18 @@ async function loadStats(){
     const d = new Date(Number(x.createdAt || x.id));
     const div = document.createElement("div");
     div.className = "list-row";
+    // Modified style for better icons
     div.innerHTML = `
       <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-blue-500 shrink-0">
-          <i class="ph-bold ph-shopping-bag leading-none"></i>
+        <div class="icon-circle">
+          <i class="ph-bold ph-shopping-bag leading-none text-lg"></i>
         </div>
         <div>
-          <div class="font-semibold text-sm">${escapeHtml(x.cat || "noma'lum")}</div>
+          <div class="font-semibold text-sm text-gray-100">${escapeHtml(x.cat || "noma'lum")}</div>
           <div class="text-xs text-gray-500">${escapeHtml(x.name || "User")} • ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}</div>
         </div>
       </div>
-      <div class="font-bold text-white">${Number(x.amount||0).toLocaleString()}</div>
+      <div class="font-bold text-white text-base">${Number(x.amount||0).toLocaleString()}</div>
     `;
     history.appendChild(div);
   });
@@ -946,25 +1074,28 @@ async function loadStats(){
   const days = Object.keys(byDate).sort((a,b)=>a<b?1:-1);
   for(const day of days){
     const block=document.createElement("div");
-    block.className="glass-card !p-4";
+    block.className="glass-card !p-0 overflow-hidden"; // Tighter styling for list
 
     const d=new Date(day+"T00:00:00");
     let sum=0;
     byDate[day].forEach(x=>sum+=Number(x.amount)||0);
 
-    let html=`<div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-700">
-      <span class="font-bold text-gray-300">${d.toLocaleDateString()}</span>
-      <span class="text-blue-400 font-bold">${sum.toLocaleString()}</span>
-    </div>`;
+    let html=`<div class="flex justify-between items-center p-4 bg-white/5 border-b border-white/5">
+      <span class="font-bold text-gray-200">${d.toLocaleDateString()}</span>
+      <span class="text-blue-400 font-bold bg-blue-500/10 px-2 py-0.5 rounded">${sum.toLocaleString()}</span>
+    </div>
+    <div class="p-4">`;
 
     for(const x of byDate[day]){
-      html+=`<div class="flex justify-between text-sm mb-2 last:mb-0">
-        <span class="text-gray-400">${escapeHtml(x.cat || "noma'lum")}
-          <span class="text-xs opacity-50">(${escapeHtml(x.name || "")})</span>
-        </span>
-        <span>${Number(x.amount||0).toLocaleString()}</span>
+      html+=`<div class="flex justify-between text-sm mb-3 last:mb-0 items-center">
+        <div class="flex flex-col">
+            <span class="text-gray-300 font-medium">${escapeHtml(x.cat || "noma'lum")}</span>
+            <span class="text-xs text-gray-500">${escapeHtml(x.name || "")}</span>
+        </div>
+        <span class="font-mono text-gray-200">${Number(x.amount||0).toLocaleString()}</span>
       </div>`;
     }
+    html += `</div>`;
     block.innerHTML=html;
     calendar.appendChild(block);
   }
@@ -994,31 +1125,32 @@ async function refreshFamily(){
   const isLeader = (String(leader.id) === String(user.id));
 
   document.getElementById("familyName").innerText = isLeader ? "Mening Oilam" : "Oila";
-  document.getElementById("familyIdDisplay").innerText = "Oila ID: " + leader.id;
+  document.getElementById("familyIdDisplay").innerText = "ID: " + leader.id;
 
   document.getElementById("leaveBtn").classList.toggle("hidden", isLeader);
 
-  const avatarHtml = (photo) => {
-    if (photo) return `<img src="${photo}" class="w-10 h-10 rounded-full object-cover" />`;
-    return `<div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-gray-300">
+  const avatarHtml = (photo, crown=false) => {
+    let border = crown ? "border-yellow-500/50" : "border-gray-600";
+    if (photo) return `<img src="${photo}" class="w-10 h-10 rounded-full object-cover border-2 ${border}" />`;
+    return `<div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 border-2 ${border}">
               <i class="ph-bold ph-user leading-none"></i>
             </div>`;
   };
 
   // leader row
   const leaderRow = document.createElement("div");
-  leaderRow.className = "flex items-center justify-between p-4 bg-blue-900/20";
+  leaderRow.className = "flex items-center justify-between p-4 bg-gradient-to-r from-blue-900/30 to-transparent";
   leaderRow.innerHTML = `
     <div class="flex items-center gap-3">
       <div class="relative shrink-0">
-        ${avatarHtml(leader.photo)}
-        <div class="absolute -right-1 -bottom-1 w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center">
-          <i class="ph-fill ph-crown text-black text-xs leading-none"></i>
+        ${avatarHtml(leader.photo, true)}
+        <div class="absolute -right-1 -bottom-1 w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center shadow-lg">
+          <i class="ph-fill ph-crown text-black text-[10px] leading-none"></i>
         </div>
       </div>
       <div>
-        <div class="font-bold text-white">${escapeHtml(leader.name)} <span class="text-xs text-gray-400">(ID: ${escapeHtml(leader.id)})</span></div>
-        <div class="text-xs text-gray-400">Admin</div>
+        <div class="font-bold text-white">${escapeHtml(leader.name)}</div>
+        <div class="text-xs text-yellow-500/80 font-medium">Admin</div>
       </div>
     </div>
   `;
@@ -1028,7 +1160,7 @@ async function refreshFamily(){
 
   if (!members.length) {
     const empty = document.createElement("div");
-    empty.className = "p-4 text-center text-gray-500 text-sm";
+    empty.className = "p-6 text-center text-gray-500 text-sm";
     empty.innerText = S.empty_no_members;
     listEl.appendChild(empty);
     return;
@@ -1036,10 +1168,10 @@ async function refreshFamily(){
 
   for (const m of members) {
     const row = document.createElement("div");
-    row.className = "flex items-center justify-between p-4";
+    row.className = "flex items-center justify-between p-4 hover:bg-white/5 transition-colors";
 
     const actionBtn = isLeader ? `
-      <button onclick="kickMember('${String(m.id)}')" class="w-8 h-8 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center shrink-0">
+      <button onclick="kickMember('${String(m.id)}')" class="w-8 h-8 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center shrink-0 border border-red-500/20 active:bg-red-500/20">
         <i class="ph-bold ph-trash leading-none"></i>
       </button>` : "";
 
@@ -1048,7 +1180,7 @@ async function refreshFamily(){
         <div class="shrink-0">${avatarHtml(m.photo)}</div>
         <div>
           <div class="font-medium text-white">${escapeHtml(m.name || "User")}</div>
-          <div class="text-xs text-gray-500">ID: ${escapeHtml(String(m.id))}</div>
+          <div class="text-xs text-gray-500 font-mono">ID: ${escapeHtml(String(m.id))}</div>
         </div>
       </div>
       ${actionBtn}
